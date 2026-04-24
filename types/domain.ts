@@ -27,6 +27,8 @@ export interface MissionQuestion {
   explanation?: string;
   sampleAnswer?: string;
   placeholder?: string;
+  sourcePlatform?: string;
+  sourceUrl?: string;
 }
 
 export interface Mission {

@@ -12,6 +12,20 @@ import { demoMissions } from "@/lib/sample-data";
 type Params = Promise<{ taskId: string }>;
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
+function formatPracticePlatform(sourcePlatform?: string) {
+  const normalized = (sourcePlatform || "").toLowerCase();
+
+  if (normalized === "leetcode") {
+    return "LeetCode";
+  }
+
+  if (normalized === "gfg" || normalized === "geeksforgeeks") {
+    return "GeeksforGeeks";
+  }
+
+  return "practice link";
+}
+
 export default async function MissionPage({
   params,
   searchParams
@@ -127,11 +141,27 @@ export default async function MissionPage({
                     ))}
                   </div>
                 ) : (
-                  <textarea
-                    className="textarea"
-                    name={`answer_${question.id}`}
-                    placeholder={question.placeholder || "Write your answer here..."}
-                  />
+                  <div className="stack">
+                    {question.sourceUrl ? (
+                      <div className="pill-row">
+                        <a
+                          href={question.sourceUrl}
+                          className="button-ghost"
+                          target="_blank"
+                          rel="noreferrer noopener"
+                        >
+                          Open on {formatPracticePlatform(question.sourcePlatform)}
+                        </a>
+                      </div>
+                    ) : null}
+                    <textarea
+                      className="textarea"
+                      name={`answer_${question.id}`}
+                      placeholder={
+                        question.placeholder || "Write your answer here..."
+                      }
+                    />
+                  </div>
                 )}
               </div>
             ))}
@@ -162,6 +192,18 @@ export default async function MissionPage({
                     <span className="eyebrow">Review {index + 1}</span>
                     <strong>{question.prompt}</strong>
                   </div>
+                  {question.sourceUrl ? (
+                    <div className="pill-row">
+                      <a
+                        href={question.sourceUrl}
+                        className="button-ghost"
+                        target="_blank"
+                        rel="noreferrer noopener"
+                      >
+                        Open on {formatPracticePlatform(question.sourcePlatform)}
+                      </a>
+                    </div>
+                  ) : null}
                   {question.explanation ? <p>{question.explanation}</p> : null}
                   {question.sampleAnswer ? (
                     <div className="notice">

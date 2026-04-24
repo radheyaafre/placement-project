@@ -65,6 +65,8 @@ function mapSupabaseMission(dayRow: any): Mission | null {
         question.question_type === "mcq"
           ? undefined
           : "Write your answer here...",
+      sourcePlatform: question.source_platform || undefined,
+      sourceUrl: question.source_url || undefined,
       options: asArray(question.question_options)
         .sort((left: any, right: any) => (left.position || 0) - (right.position || 0))
         .map((option: any, index: number) => ({
@@ -255,6 +257,8 @@ export async function getDashboardSnapshot() {
           question_type,
           explanation_md,
           sample_answer_md,
+          source_platform,
+          source_url,
           question_options (
             id,
             position,

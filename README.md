@@ -9,6 +9,7 @@ This folder now contains both the planning documents and a starter MVP app for a
 - `lib/` - demo mode, data loaders, scoring logic, auth helpers, reminder helpers
 - `supabase/migrations/20260424_initial_schema.sql` - initial database schema with RLS
 - `supabase/seed.sql` - sample seed content for the full first week
+- `supabase/seed_rich_content.sql` - generated richer 90-day content seed plus a 1000-question aptitude bank
 - `public/plan-template.csv` - starter CSV template for admin imports
 - `01-mvp-feature-spec.md` - product scope and feature spec
 - `02-database-schema-and-page-flow.md` - schema and route-level flow
@@ -64,6 +65,13 @@ Open `http://localhost:3000`.
    - `REMINDER_FROM_EMAIL`
    - `BUG_REPORT_TO_EMAIL`
 5. Restart the dev server.
+
+## Generate the rich content seed
+
+Run:
+`npm run generate:rich-seed`
+
+This regenerates [seed_rich_content.sql](/Users/rsafre/Docs/placement_project/supabase/seed_rich_content.sql) using the content generator in [generate-rich-seed.mjs](/Users/rsafre/Docs/placement_project/scripts/generate-rich-seed.mjs).
 
 ## Deploy to Vercel
 
