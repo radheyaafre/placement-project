@@ -288,6 +288,8 @@ export async function getDashboardSnapshot() {
     .map((dayRow: any) => mapSupabaseMission(dayRow))
     .filter(Boolean) as Mission[];
 
+  const currentMissionIds = new Set(missions.map((mission) => mission.id));
+
   const { data: progressRows } = await supabase
     .from("user_task_progress")
     .select("id, task_id, status, attempt_count, score, completed_at, solution_unlocked_at")
@@ -296,6 +298,10 @@ export async function getDashboardSnapshot() {
   const progressByTaskId = (progressRows || []).reduce<
     Record<string, MissionProgress>
   >((acc, row: any) => {
+    if (missions.length && !currentMissionIds.has(row.task_id)) {
+      return acc;
+    }
+
     acc[row.task_id] = {
       progressId: row.id,
       taskId: row.task_id,
@@ -310,23 +316,21 @@ export async function getDashboardSnapshot() {
   }, {});
 
   if (!missions.length) {
-    const demoState = await getDemoState();
-
     return buildDashboardSnapshot({
       mode: "supabase",
       profile: viewer.profile,
       reminderSettings: {
-        emailEnabled: true,
-        weeklyReminderEnabled: true,
+        emailEnabled: false,
+        weeklyReminderEnabled: false,
         weeklyReminderDay: 0,
         weeklyReminderHour: 19,
         timezone: viewer.profile.timezone
       },
       planName: planTemplate?.name || "Placement Sprint",
       totalDays: planTemplate?.duration_days || 90,
-      startDate: demoState.startDate || startDate,
+      startDate,
       missions: demoMissions,
-      progressByTaskId: buildDemoProgressMap(demoMissions, demoState)
+      progressByTaskId: {}
     });
   }
 
@@ -342,8 +346,8 @@ export async function getDashboardSnapshot() {
     mode: "supabase",
     profile: viewer.profile,
     reminderSettings: {
-      emailEnabled: reminderRow?.email_enabled ?? true,
-      weeklyReminderEnabled: reminderRow?.weekly_reminder_enabled ?? true,
+      emailEnabled: false,
+      weeklyReminderEnabled: false,
       weeklyReminderDay: reminderRow?.weekly_reminder_day ?? 0,
       weeklyReminderHour: reminderRow?.weekly_reminder_hour ?? 19,
       timezone: reminderRow?.timezone || viewer.profile.timezone
@@ -499,8 +503,8 @@ export async function getSettingsSnapshot(): Promise<SettingsSnapshot | null> {
     mode: "supabase",
     profile: viewer.profile,
     reminderSettings: {
-      emailEnabled: reminderRow?.email_enabled ?? true,
-      weeklyReminderEnabled: reminderRow?.weekly_reminder_enabled ?? true,
+      emailEnabled: false,
+      weeklyReminderEnabled: false,
       weeklyReminderDay: reminderRow?.weekly_reminder_day ?? 0,
       weeklyReminderHour: reminderRow?.weekly_reminder_hour ?? 19,
       timezone: reminderRow?.timezone || viewer.profile.timezone

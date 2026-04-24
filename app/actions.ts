@@ -292,8 +292,6 @@ export async function saveOnboardingAction(formData: FormData) {
   const timezone = readString(formData, "timezone", {
     defaultValue: "Asia/Kolkata"
   });
-  const weeklyReminderDay = readNumber(formData, "weeklyReminderDay", 0);
-  const weeklyReminderHour = readNumber(formData, "weeklyReminderHour", 19);
 
   if (!fullName) {
     redirect(buildRedirect("/onboarding", { error: "Please add your name." }));
@@ -315,10 +313,10 @@ export async function saveOnboardingAction(formData: FormData) {
       reminderSettings: {
         ...current.reminderSettings,
         timezone,
-        emailEnabled: true,
-        weeklyReminderEnabled: true,
-        weeklyReminderDay,
-        weeklyReminderHour
+        emailEnabled: false,
+        weeklyReminderEnabled: false,
+        weeklyReminderDay: 0,
+        weeklyReminderHour: 19
       }
     });
 
@@ -387,10 +385,10 @@ export async function saveOnboardingAction(formData: FormData) {
 
   await supabase.from("reminder_preferences").upsert({
     user_id: viewer.userId,
-    email_enabled: true,
-    weekly_reminder_enabled: true,
-    weekly_reminder_day: weeklyReminderDay,
-    weekly_reminder_hour: weeklyReminderHour,
+    email_enabled: false,
+    weekly_reminder_enabled: false,
+    weekly_reminder_day: 0,
+    weekly_reminder_hour: 19,
     timezone
   });
 
@@ -406,11 +404,6 @@ export async function saveSettingsAction(formData: FormData) {
   const timezone = readString(formData, "timezone", {
     defaultValue: "Asia/Kolkata"
   });
-  const emailEnabled = readString(formData, "emailEnabled") === "on";
-  const weeklyReminderEnabled =
-    readString(formData, "weeklyReminderEnabled") === "on";
-  const weeklyReminderDay = readNumber(formData, "weeklyReminderDay", 0);
-  const weeklyReminderHour = readNumber(formData, "weeklyReminderHour", 19);
 
   if (!isSupabaseConfigured()) {
     const current = await getDemoState();
@@ -427,10 +420,10 @@ export async function saveSettingsAction(formData: FormData) {
       reminderSettings: {
         ...current.reminderSettings,
         timezone,
-        emailEnabled,
-        weeklyReminderEnabled,
-        weeklyReminderDay,
-        weeklyReminderHour
+        emailEnabled: false,
+        weeklyReminderEnabled: false,
+        weeklyReminderDay: 0,
+        weeklyReminderHour: 19
       }
     });
 
@@ -458,10 +451,10 @@ export async function saveSettingsAction(formData: FormData) {
 
   await supabase.from("reminder_preferences").upsert({
     user_id: viewer.userId,
-    email_enabled: emailEnabled,
-    weekly_reminder_enabled: weeklyReminderEnabled,
-    weekly_reminder_day: weeklyReminderDay,
-    weekly_reminder_hour: weeklyReminderHour,
+    email_enabled: false,
+    weekly_reminder_enabled: false,
+    weekly_reminder_day: 0,
+    weekly_reminder_hour: 19,
     timezone
   });
 

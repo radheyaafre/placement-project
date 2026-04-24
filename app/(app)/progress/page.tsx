@@ -3,7 +3,7 @@ import Link from "next/link";
 import { SectionCard } from "@/components/section-card";
 import { StatusBadge } from "@/components/status-badge";
 import { getProgressSnapshot } from "@/lib/data";
-import { formatTaskType, percent } from "@/lib/utils";
+import { formatPlanDate, formatTaskType, parseLocalDate, percent, shiftDays } from "@/lib/utils";
 
 export default async function ProgressPage() {
   const data = await getProgressSnapshot();
@@ -13,18 +13,28 @@ export default async function ProgressPage() {
   }
 
   const visibleMissionStates = data.snapshot.visibleMissionStates ?? [];
+  const availableMissionStates = visibleMissionStates.filter(
+    ({ mission }) => mission.dayNumber <= data.snapshot.currentDay
+  );
   const inProgress = visibleMissionStates.filter(
     ({ status }) => status === "attempted" || status === "solution_unlocked"
   );
   const completed = visibleMissionStates.filter(
     ({ status }) => status === "completed"
   );
-  const weekMissionCount = data.snapshot.missions.filter(
-    (mission) => mission.weekNumber === data.snapshot.currentWeek
+  const completedSoFarCount = availableMissionStates.filter(
+    ({ status }) => status === "completed"
   ).length;
-  const weeklyCompletion = percent(
-    data.snapshot.weeklyCompletedCount,
-    weekMissionCount
+  const availableMissionCount =
+    availableMissionStates.length || Math.min(data.snapshot.currentDay, data.snapshot.totalDays);
+  const remainingFutureCount = Math.max(
+    data.snapshot.totalDays - availableMissionCount,
+    0
+  );
+  const planStartDate = parseLocalDate(data.snapshot.startDate);
+  const overallCompletionSoFar = percent(
+    completedSoFarCount,
+    availableMissionCount
   );
 
   return (
@@ -35,24 +45,24 @@ export default async function ProgressPage() {
             <p className="eyebrow">Progress snapshot</p>
             <h1 className="app-page-title">Keep your daily progress visible.</h1>
             <p>
-              A clean progress view makes it easier to keep going. Finish one task,
-              see the movement, and come back tomorrow.
+              Track progress against the days that are already due, then let the
+              future days unlock one by one.
             </p>
           </div>
           <div className="progress-band">
             <div className="progress-band__top">
-              <span className="eyebrow">This week</span>
-              <strong>{weeklyCompletion}% complete</strong>
+              <span className="eyebrow">Overall completion so far</span>
+              <strong>{overallCompletionSoFar}% complete</strong>
             </div>
             <div className="progress-bar">
-              <span style={{ width: `${weeklyCompletion}%` }} />
+              <span style={{ width: `${overallCompletionSoFar}%` }} />
             </div>
             <div className="progress-band__meta">
               <span>
-                {data.snapshot.weeklyCompletedCount} of {weekMissionCount} missions
-                done
+                {completedSoFarCount} of {availableMissionCount} available days
+                completed
               </span>
-              <span>{inProgress.length} currently in motion</span>
+              <span>{remainingFutureCount} days yet to come</span>
             </div>
           </div>
         </div>
@@ -104,6 +114,9 @@ export default async function ProgressPage() {
                 <strong className="task-row__title-text">
                   Day {mission.dayNumber}: {mission.title}
                 </strong>
+                <p className="task-row__schedule">
+                  {formatPlanDate(shiftDays(planStartDate, mission.dayNumber - 1))}
+                </p>
                 <p className="muted">
                   {formatTaskType(mission.taskType)} • {mission.topic}
                   {typeof score === "number" ? ` • Score ${score}%` : ""}
@@ -121,11 +134,19 @@ export default async function ProgressPage() {
       <SectionCard title="Completed" eyebrow="Done">
         <div className="task-list">
           {completed.length ? completed.map(({ mission, status, score }) => (
-            <div key={mission.id} className="task-row">
+            <Link
+              key={mission.id}
+              href={`/mission/${mission.id}`}
+              className="task-row task-row--interactive"
+              data-loading-label={`Opening Day ${mission.dayNumber}`}
+            >
               <div className="task-row__meta">
                 <strong className="task-row__title-text">
                   Day {mission.dayNumber}: {mission.title}
                 </strong>
+                <p className="task-row__schedule">
+                  {formatPlanDate(shiftDays(planStartDate, mission.dayNumber - 1))}
+                </p>
                 <p className="muted">
                   {formatTaskType(mission.taskType)}
                   {typeof score === "number" ? ` • Score ${score}%` : ""}
@@ -135,7 +156,7 @@ export default async function ProgressPage() {
                 <StatusBadge taskType={mission.taskType} />
                 <StatusBadge status={status} />
               </div>
-            </div>
+            </Link>
           )) : <p className="muted">Completed missions will appear here.</p>}
         </div>
       </SectionCard>

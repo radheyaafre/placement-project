@@ -3,14 +3,9 @@ import Link from "next/link";
 import { saveOnboardingAction } from "@/app/actions";
 import { SubmitButton } from "@/components/submit-button";
 import { getSettingsSnapshot } from "@/lib/data";
-import { buildRedirect, formatHour12 } from "@/lib/utils";
+import { buildRedirect } from "@/lib/utils";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
-
-const reminderHourOptions = Array.from({ length: 24 }, (_, hour) => ({
-  value: `${hour}`,
-  label: formatHour12(hour)
-}));
 
 export default async function OnboardingPage({
   searchParams
@@ -80,52 +75,6 @@ export default async function OnboardingPage({
               defaultValue={settings.profile.timezone}
             />
           </div>
-          <div className="split-panel">
-            <div className="field">
-              <label htmlFor="weeklyReminderDay">Weekly reminder day</label>
-              <select
-                className="select"
-                id="weeklyReminderDay"
-                name="weeklyReminderDay"
-                defaultValue={`${settings.reminderSettings.weeklyReminderDay}`}
-              >
-                <option value="0">Sunday</option>
-                <option value="1">Monday</option>
-                <option value="2">Tuesday</option>
-                <option value="3">Wednesday</option>
-                <option value="4">Thursday</option>
-                <option value="5">Friday</option>
-                <option value="6">Saturday</option>
-              </select>
-            </div>
-            <div className="field">
-              <div className="field-label-row">
-                <label htmlFor="weeklyReminderHour">Reminder time</label>
-                <span
-                  className="info-chip"
-                  title="This sends one weekly reminder email around the selected time in your timezone."
-                >
-                  i
-                </span>
-              </div>
-              <p className="field-note">
-                Pick the time when the weekly reminder should reach the student in
-                their own timezone.
-              </p>
-              <select
-                className="select"
-                id="weeklyReminderHour"
-                name="weeklyReminderHour"
-                defaultValue={`${settings.reminderSettings.weeklyReminderHour}`}
-              >
-                {reminderHourOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
           <SubmitButton
             label="Save and start Day 1"
             pendingLabel="Starting Day 1..."
@@ -159,10 +108,10 @@ export default async function OnboardingPage({
             </p>
           </div>
           <div className="callout">
-            <h3>3. Weekly reminder rhythm</h3>
+            <h3>3. Clear progress view</h3>
             <p className="muted">
-              Reminder preferences are stored here and later used by the scheduled
-              reminder route.
+              Students can always see what is done, what is started, and what comes
+              next in the 90-day plan.
             </p>
           </div>
         </div>

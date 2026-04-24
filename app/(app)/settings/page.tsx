@@ -2,14 +2,8 @@ import { saveSettingsAction, signOutAction } from "@/app/actions";
 import { SectionCard } from "@/components/section-card";
 import { SubmitButton } from "@/components/submit-button";
 import { getSettingsSnapshot } from "@/lib/data";
-import { formatHour12, formatWeekday } from "@/lib/utils";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
-
-const reminderHourOptions = Array.from({ length: 24 }, (_, hour) => ({
-  value: `${hour}`,
-  label: formatHour12(hour)
-}));
 
 export default async function SettingsPage({
   searchParams
@@ -24,12 +18,6 @@ export default async function SettingsPage({
     return null;
   }
 
-  const reminderSummary = settings.reminderSettings.weeklyReminderEnabled
-    ? `${formatWeekday(settings.reminderSettings.weeklyReminderDay)} at ${formatHour12(
-        settings.reminderSettings.weeklyReminderHour
-      )}`
-    : "Weekly reminder is off";
-
   return (
     <div className="stack">
       <div className="summary-grid">
@@ -41,17 +29,15 @@ export default async function SettingsPage({
           </p>
         </div>
         <div className="summary-tile">
-          <span className="eyebrow">Reminder rhythm</span>
-          <strong>{reminderSummary}</strong>
+          <span className="eyebrow">Timezone</span>
+          <strong>{settings.profile.timezone}</strong>
           <p className="muted">
-            {settings.reminderSettings.emailEnabled
-              ? "Email reminders are enabled."
-              : "Email reminders are paused."}
+            Your daily plan follows this timezone.
           </p>
         </div>
       </div>
 
-      <SectionCard title="Settings" eyebrow="Profile and reminders">
+      <SectionCard title="Settings" eyebrow="Profile">
         {saved ? <div className="notice">{saved}</div> : null}
         <form action={saveSettingsAction} className="stack">
           <div className="field">
@@ -93,70 +79,6 @@ export default async function SettingsPage({
               type="text"
               defaultValue={settings.profile.timezone}
             />
-          </div>
-          <div className="split-panel">
-            <label className="option-card">
-              <input
-                defaultChecked={settings.reminderSettings.emailEnabled}
-                name="emailEnabled"
-                type="checkbox"
-              />
-              <span>Enable reminder emails</span>
-            </label>
-            <label className="option-card">
-              <input
-                defaultChecked={settings.reminderSettings.weeklyReminderEnabled}
-                name="weeklyReminderEnabled"
-                type="checkbox"
-              />
-              <span>Send weekly reminder</span>
-            </label>
-          </div>
-          <div className="split-panel">
-            <div className="field">
-              <label htmlFor="weeklyReminderDay">Reminder day</label>
-              <select
-                className="select"
-                id="weeklyReminderDay"
-                name="weeklyReminderDay"
-                defaultValue={`${settings.reminderSettings.weeklyReminderDay}`}
-              >
-                <option value="0">Sunday</option>
-                <option value="1">Monday</option>
-                <option value="2">Tuesday</option>
-                <option value="3">Wednesday</option>
-                <option value="4">Thursday</option>
-                <option value="5">Friday</option>
-                <option value="6">Saturday</option>
-              </select>
-            </div>
-            <div className="field">
-              <div className="field-label-row">
-                <label htmlFor="weeklyReminderHour">Reminder time</label>
-                <span
-                  className="info-chip"
-                  title="This sends one weekly reminder email around the selected time in your timezone."
-                >
-                  i
-                </span>
-              </div>
-              <p className="field-note">
-                Sends one weekly reminder around this local time so students return
-                to the app and continue the daily plan.
-              </p>
-              <select
-                className="select"
-                id="weeklyReminderHour"
-                name="weeklyReminderHour"
-                defaultValue={`${settings.reminderSettings.weeklyReminderHour}`}
-              >
-                {reminderHourOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </div>
           </div>
           <SubmitButton label="Save settings" pendingLabel="Saving settings..." />
         </form>

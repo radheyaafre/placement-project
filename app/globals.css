@@ -986,6 +986,26 @@ button {
   font-weight: 700;
 }
 
+.app-shell__program-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.app-shell__program-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 11px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  color: #d7e0ec;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
 .app-shell__navrow {
   display: flex;
   justify-content: space-between;
@@ -1102,6 +1122,8 @@ button {
   border-radius: var(--radius-md);
   border: 1px solid var(--line);
   background: rgba(25, 30, 39, 0.88);
+  position: relative;
+  overflow: hidden;
 }
 
 .task-row {
@@ -1125,12 +1147,30 @@ button {
 }
 
 .task-row--locked {
-  opacity: 0.78;
+  opacity: 1;
   cursor: not-allowed;
+  border-style: dashed;
+  border-color: rgba(148, 163, 184, 0.2);
+  background:
+    linear-gradient(180deg, rgba(19, 23, 30, 0.95), rgba(16, 19, 25, 0.96));
 }
 
 .task-row--locked::before {
   background: linear-gradient(180deg, rgba(148, 163, 184, 0.28), rgba(100, 116, 139, 0.2));
+}
+
+.task-row--locked::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    135deg,
+    rgba(148, 163, 184, 0.04) 0,
+    rgba(148, 163, 184, 0.04) 10px,
+    transparent 10px,
+    transparent 20px
+  );
+  pointer-events: none;
 }
 
 .task-row::before {
@@ -1157,8 +1197,9 @@ button {
 
 .task-row--locked:hover {
   transform: none;
-  border-color: var(--line);
-  background: rgba(25, 30, 39, 0.88);
+  border-color: rgba(148, 163, 184, 0.2);
+  background:
+    linear-gradient(180deg, rgba(19, 23, 30, 0.95), rgba(16, 19, 25, 0.96));
 }
 
 .task-row__meta,
@@ -1192,6 +1233,15 @@ button {
 
 .task-row__title-text {
   color: rgba(243, 245, 247, 0.9);
+}
+
+.task-row--locked .task-row__title-text {
+  color: rgba(224, 230, 238, 0.82);
+}
+
+.task-row--locked .task-row__schedule,
+.task-row--locked .muted {
+  color: rgba(154, 164, 178, 0.78);
 }
 
 .task-row__schedule {
@@ -1238,8 +1288,9 @@ button {
 }
 
 .queue-status--locked {
-  background: rgba(148, 163, 184, 0.12);
-  color: #c2c9d4;
+  background: rgba(100, 116, 139, 0.18);
+  border-color: rgba(148, 163, 184, 0.18);
+  color: #d4dbe6;
 }
 
 .field {

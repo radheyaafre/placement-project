@@ -9,12 +9,18 @@ export function AppShell({
   children,
   displayName,
   isAdmin,
-  mode
+  mode,
+  programMeta
 }: {
   children: ReactNode;
   displayName: string;
   isAdmin: boolean;
   mode: "demo" | "supabase";
+  programMeta?: {
+    startLabel: string;
+    endLabel: string;
+    dayLabel: string;
+  } | null;
 }) {
   return (
     <div className="app-shell">
@@ -26,12 +32,25 @@ export function AppShell({
               <span className="brand-mark__text">SamyakLabs.AI</span>
             </Link>
             <div className="app-shell__intro">
-              <p className="app-shell__tag">Placement prep, only one focused hour daily for 90 days</p>
+              <p className="app-shell__tag">Placement prep workspace</p>
               <p className="muted">
                 {mode === "demo"
                   ? "Problem-first demo mode."
                   : `Logged in as ${displayName}`}
               </p>
+              {programMeta ? (
+                <div className="app-shell__program-meta">
+                  <span className="app-shell__program-pill">
+                    Start {programMeta.startLabel}
+                  </span>
+                  <span className="app-shell__program-pill">
+                    End {programMeta.endLabel}
+                  </span>
+                  <span className="app-shell__program-pill">
+                    {programMeta.dayLabel}
+                  </span>
+                </div>
+              ) : null}
             </div>
           </div>
 
