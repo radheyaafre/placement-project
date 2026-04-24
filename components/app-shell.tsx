@@ -20,11 +20,13 @@ export function AppShell({
       <header className="app-shell__header">
         <div className="brand-lockup">
           <Link href="/" className="brand-mark">
-            Placement
-            <span>Prep</span>
+            <span className="brand-mark__dot" aria-hidden="true" />
+            <span className="brand-mark__text">samyaklabs.ai</span>
           </Link>
           <div>
-            <p className="eyebrow">Placement prep, one hour at a time</p>
+            <p className="eyebrow">
+              Placement prep, only one hour daily for 90 days
+            </p>
             <p className="muted">
               {mode === "demo"
                 ? "Explore the student flow in demo mode."
@@ -34,10 +36,6 @@ export function AppShell({
         </div>
 
         <div className="app-shell__actions">
-          <div className="pill-row">
-            <span className="pill">{mode === "demo" ? "Demo" : "Live"}</span>
-            <span className="pill">1 hour a day</span>
-          </div>
           {mode === "supabase" ? (
             <form action={signOutAction} className="app-shell__signout">
               <button className="button-ghost" type="submit">

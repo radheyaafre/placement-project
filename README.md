@@ -62,6 +62,7 @@ Open `http://localhost:3000`.
    - `CRON_SECRET`
    - `RESEND_API_KEY`
    - `REMINDER_FROM_EMAIL`
+   - `BUG_REPORT_TO_EMAIL`
 5. Restart the dev server.
 
 ## Deploy to Vercel

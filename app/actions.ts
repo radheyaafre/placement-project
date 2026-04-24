@@ -6,7 +6,13 @@ import { redirect } from "next/navigation";
 import { getViewerContext } from "@/lib/auth";
 import { getMissionDetail } from "@/lib/data";
 import { getDemoState, setDemoState } from "@/lib/demo-state";
-import { getAppUrl, isSupabaseConfigured } from "@/lib/env";
+import {
+  getAppUrl,
+  getBugReportToEmail,
+  getResendFromEmail,
+  isBugReportConfigured,
+  isSupabaseConfigured
+} from "@/lib/env";
 import { scoreAptitudeMission } from "@/lib/plan";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
@@ -45,6 +51,126 @@ function readAnswers(formData: FormData, questionIds: string[]) {
 
     return acc;
   }, {});
+}
+
+type BugReportActionState = {
+  status: "idle" | "success" | "error";
+  message: string;
+};
+
+async function sendBugReportEmail(params: {
+  report: string;
+  source: string;
+  reporterName: string;
+  reporterEmail: string;
+  reporterMode: string;
+  reporterUserId: string;
+}) {
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      from: getResendFromEmail(),
+      to: getBugReportToEmail(),
+      subject: `Placement Prep bug report${
+        params.reporterName !== "Public visitor" ? ` from ${params.reporterName}` : ""
+      }`,
+      text: [
+        `Source: ${params.source}`,
+        `Reporter: ${params.reporterName}`,
+        `Reporter email: ${params.reporterEmail || "Not available"}`,
+        `Mode: ${params.reporterMode}`,
+        `User ID: ${params.reporterUserId || "Not available"}`,
+        `Sent at: ${new Date().toISOString()}`,
+        "",
+        "Bug details:",
+        params.report
+      ].join("\n")
+    })
+  });
+
+  if (response.ok) {
+    return;
+  }
+
+  const payload = await response.json().catch(() => null);
+  const message =
+    typeof payload?.message === "string"
+      ? payload.message
+      : "Unable to send the bug report right now.";
+
+  throw new Error(message);
+}
+
+export async function submitBugReportAction(
+  _prevState: BugReportActionState,
+  formData: FormData
+): Promise<BugReportActionState> {
+  const report = readString(formData, "report");
+  const source = readString(formData, "source", {
+    defaultValue: "Public home page"
+  });
+
+  if (report.length < 10) {
+    return {
+      status: "error",
+      message: "Add a little more detail so we can understand the bug."
+    };
+  }
+
+  if (!isBugReportConfigured()) {
+    return {
+      status: "error",
+      message: "Bug report email is not configured yet. Add RESEND_API_KEY first."
+    };
+  }
+
+  let reporterName = "Public visitor";
+  let reporterEmail = "";
+  let reporterMode = isSupabaseConfigured() ? "supabase" : "demo";
+  let reporterUserId = "";
+
+  if (isSupabaseConfigured()) {
+    const supabase = await createSupabaseServerClient();
+    const {
+      data: { user }
+    } = await supabase.auth.getUser();
+
+    if (user) {
+      const viewer = await getViewerContext();
+      reporterName = viewer.displayName;
+      reporterEmail = user.email || "";
+      reporterMode = viewer.mode;
+      reporterUserId = user.id;
+    }
+  }
+
+  try {
+    await sendBugReportEmail({
+      report,
+      source,
+      reporterName,
+      reporterEmail,
+      reporterMode,
+      reporterUserId
+    });
+
+    return {
+      status: "success",
+      message: "Bug report sent. Thank you."
+    };
+  } catch (error) {
+    return {
+      status: "error",
+      message:
+        error instanceof Error
+          ? error.message
+          : "Unable to send the bug report right now."
+    };
+  }
 }
 
 export async function signInAction(formData: FormData) {

@@ -49,64 +49,49 @@ export default async function DashboardPage() {
         scheduledFor
       };
     });
+  const progressLabel = `${snapshot.completedCount}/${snapshot.totalDays}`;
+  const completedCaption =
+    snapshot.completedCount === 1 ? "day completed" : "days completed";
+  const streakCaption =
+    snapshot.currentStreak === 1 ? "day in a row" : "days in a row";
 
   return (
     <div className="stack">
-      <section className="hero-panel app-hero app-hero--dashboard">
-        <div className="dashboard-grid">
-          <div className="hero-copy">
-            <p className="eyebrow">
-              {snapshot.currentDay} out of {snapshot.totalDays} days
-            </p>
-            <h1 style={{ fontSize: "4rem" }}>
-              {snapshot.todayMission.title}
-            </h1>
-            <p>
-              {formatTaskType(snapshot.todayMission.taskType)} •{" "}
-              {snapshot.todayMission.estimatedMinutes} min • {todayMissionDate}
-            </p>
-            <div className="button-row">
-              <Link
-                href={`/mission/${snapshot.todayMission.id}`}
-                className="button"
-              >
-                Open today&apos;s mission
-              </Link>
-              <Link href="/progress" className="button-secondary">
-                See full progress
-              </Link>
-            </div>
-            <div className="focus-strip">
-              <span className="eyebrow">Today&apos;s focus</span>
-              <strong>{snapshot.todayMission.topic}</strong>
-              <div className="focus-strip__meta">
-                <span>{snapshot.todayMission.estimatedMinutes} minute commitment</span>
-                <span>
-                  {snapshot.completedCount} of {snapshot.totalDays} days finished
-                </span>
-              </div>
-            </div>
+      <section className="hero-panel app-hero app-hero--dashboard dashboard-hero">
+        <div className="hero-copy dashboard-hero__copy">
+          <h1 className="dashboard-hero__title">{snapshot.todayMission.title}</h1>
+          <p className="dashboard-hero__meta">
+            {formatTaskType(snapshot.todayMission.taskType)} •{" "}
+            {snapshot.todayMission.estimatedMinutes} min • {todayMissionDate}
+          </p>
+          <div className="button-row">
+            <Link
+              href={`/mission/${snapshot.todayMission.id}`}
+              className="button"
+            >
+              Open today&apos;s mission
+            </Link>
+            <Link href="/progress" className="button-secondary">
+              See full progress
+            </Link>
           </div>
-          <div className="stack">
-            <div className="stat-grid">
-              <div className="stat-card">
-                <span className="eyebrow">Progress</span>
-                <strong>
-                  {snapshot.completedCount}/{snapshot.totalDays}
-                </strong>
-                <p className="muted">days completed</p>
-              </div>
-              <div className="stat-card">
-                <span className="eyebrow">Started</span>
-                <strong>{snapshot.inProgressCount}</strong>
-                <p className="muted">started but not finished</p>
-              </div>
-              <div className="stat-card">
-                <span className="eyebrow">Streak</span>
-                <strong>{snapshot.currentStreak}</strong>
-                <p className="muted">days in a row</p>
-              </div>
-            </div>
+        </div>
+
+        <div className="stat-grid dashboard-hero__stats">
+          <div className="stat-card">
+            <span className="stat-card__label">Progress</span>
+            <strong>{progressLabel}</strong>
+            <p className="muted">{completedCaption}</p>
+          </div>
+          <div className="stat-card">
+            <span className="stat-card__label">Started</span>
+            <strong>{snapshot.inProgressCount}</strong>
+            <p className="muted">started but not finished</p>
+          </div>
+          <div className="stat-card">
+            <span className="stat-card__label">Streak</span>
+            <strong>{snapshot.currentStreak}</strong>
+            <p className="muted">{streakCaption}</p>
           </div>
         </div>
       </section>
