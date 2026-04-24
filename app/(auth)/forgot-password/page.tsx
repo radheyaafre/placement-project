@@ -48,7 +48,7 @@ export default async function ForgotPasswordPage({
           />
         </form>
         <p className="muted">
-          Need to sign in? <Link href="/login">Back to login</Link>
+          Need to sign in? <Link href="/login" className="text-link">Back to login</Link>
         </p>
       </div>
     </div>

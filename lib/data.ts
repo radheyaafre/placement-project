@@ -3,6 +3,7 @@ import type {
   DashboardSnapshot,
   Mission,
   MissionDetail,
+  MissionQuestionResponse,
   MissionProgress,
   ProgressSnapshot,
   ReminderSettings,
@@ -289,13 +290,14 @@ export async function getDashboardSnapshot() {
 
   const { data: progressRows } = await supabase
     .from("user_task_progress")
-    .select("task_id, status, attempt_count, score, completed_at, solution_unlocked_at")
+    .select("id, task_id, status, attempt_count, score, completed_at, solution_unlocked_at")
     .eq("user_id", viewer.userId);
 
   const progressByTaskId = (progressRows || []).reduce<
     Record<string, MissionProgress>
   >((acc, row: any) => {
     acc[row.task_id] = {
+      progressId: row.id,
       taskId: row.task_id,
       status: row.status,
       attemptCount: row.attempt_count || 0,
@@ -375,12 +377,54 @@ export async function getMissionDetail(taskId: string): Promise<MissionDetail | 
     snapshot.hasFullAccess
   );
   const usesDirectFlow = usesDirectCompleteFlow(mission.taskType);
+  let responsesByQuestionId: Record<string, MissionQuestionResponse> = {};
+
+  if (snapshot.mode === "demo" || !progress?.progressId) {
+    const demoState = await getDemoState();
+    const savedResponses = demoState.responsesByTaskId?.[taskId] || {};
+
+    responsesByQuestionId = mission.questions.reduce<
+      Record<string, MissionQuestionResponse>
+    >((acc, question) => {
+      const savedValue = savedResponses[question.id];
+
+      if (!savedValue) {
+        return acc;
+      }
+
+      acc[question.id] = {
+        answerText: question.questionType === "mcq" ? null : savedValue,
+        selectedOptionId:
+          question.questionType === "mcq" ? savedValue : null
+      };
+
+      return acc;
+    }, {});
+  } else if (isSupabaseConfigured()) {
+    const supabase = await createSupabaseServerClient();
+    const { data: attemptRows } = await supabase
+      .from("question_attempts")
+      .select("task_question_id, selected_option_id, answer_text")
+      .eq("user_task_progress_id", progress.progressId);
+
+    responsesByQuestionId = (attemptRows || []).reduce<
+      Record<string, MissionQuestionResponse>
+    >((acc, row: any) => {
+      acc[row.task_question_id] = {
+        answerText: row.answer_text ?? null,
+        selectedOptionId: row.selected_option_id ?? null
+      };
+
+      return acc;
+    }, {});
+  }
 
   return {
     snapshot,
     mission,
     status,
     progress,
+    responsesByQuestionId,
     canRevealSolution: usesDirectFlow
       ? false
       : status === "solution_unlocked" || status === "completed",

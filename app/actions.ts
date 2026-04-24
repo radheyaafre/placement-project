@@ -524,7 +524,11 @@ export async function submitMissionAttemptAction(formData: FormData) {
       ...current,
       attemptedTaskIds: unique([...current.attemptedTaskIds, taskId]),
       unlockedTaskIds: unique([...current.unlockedTaskIds, taskId]),
-      scores: nextScores
+      scores: nextScores,
+      responsesByTaskId: {
+        ...(current.responsesByTaskId || {}),
+        [taskId]: answers
+      }
     });
 
     revalidatePath(`/mission/${taskId}`);

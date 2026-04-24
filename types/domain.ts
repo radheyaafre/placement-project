@@ -66,12 +66,18 @@ export interface ReminderSettings {
 }
 
 export interface MissionProgress {
+  progressId?: string | null;
   taskId: string;
   status: Exclude<MissionStatus, "locked" | "missed">;
   attemptCount: number;
   score: number | null;
   completedAt: string | null;
   solutionUnlockedAt: string | null;
+}
+
+export interface MissionQuestionResponse {
+  answerText: string | null;
+  selectedOptionId: string | null;
 }
 
 export interface ViewerContext {
@@ -118,6 +124,7 @@ export interface MissionDetail {
   mission: Mission;
   status: MissionStatus;
   progress: MissionProgress | null;
+  responsesByQuestionId: Record<string, MissionQuestionResponse>;
   canRevealSolution: boolean;
   canMarkComplete: boolean;
 }
@@ -155,4 +162,5 @@ export interface DemoState {
   unlockedTaskIds: string[];
   completedTaskIds: string[];
   scores: Record<string, number>;
+  responsesByTaskId: Record<string, Record<string, string>>;
 }

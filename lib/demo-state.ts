@@ -32,7 +32,8 @@ function createDefaultDemoState(): DemoState {
     scores: {
       "mission-day-1": 80,
       "mission-day-2": 60
-    }
+    },
+    responsesByTaskId: {}
   };
 }
 

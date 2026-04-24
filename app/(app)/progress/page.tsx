@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { SectionCard } from "@/components/section-card";
 import { StatusBadge } from "@/components/status-badge";
 import { getProgressSnapshot } from "@/lib/data";
@@ -60,6 +62,16 @@ export default async function ProgressPage() {
         title="Progress overview"
         eyebrow={`Current week ${data.snapshot.currentWeek}`}
       >
+        <div className="callout">
+          <p>
+            You are on day {data.snapshot.currentDay} of your {data.snapshot.totalDays}-day program.
+            Till now you have finished {data.snapshot.completedCount} tasks and
+            you have {data.snapshot.pendingCount} pending tasks.
+          </p>
+          <p className="muted">
+            You can see the pending and completed tasks below.
+          </p>
+        </div>
         <div className="stat-grid">
           <div className="stat-card">
             <span className="eyebrow">Overall completion</span>
@@ -82,7 +94,12 @@ export default async function ProgressPage() {
       <SectionCard title="Continue where you left off" eyebrow="In progress">
         <div className="task-list">
           {inProgress.length ? inProgress.map(({ mission, status, score }) => (
-            <div key={mission.id} className="task-row">
+            <Link
+              key={mission.id}
+              href={`/mission/${mission.id}`}
+              className="task-row task-row--interactive"
+              data-loading-label={`Opening Day ${mission.dayNumber}`}
+            >
               <div className="task-row__meta">
                 <strong className="task-row__title-text">
                   Day {mission.dayNumber}: {mission.title}
@@ -96,7 +113,7 @@ export default async function ProgressPage() {
                 <StatusBadge taskType={mission.taskType} />
                 <StatusBadge status={status} />
               </div>
-            </div>
+            </Link>
           )) : <p className="muted">No missions are in progress yet.</p>}
         </div>
       </SectionCard>

@@ -70,13 +70,13 @@ export default async function LoginPage({
           />
         </form>
         <p className="muted">
-          Forgot your password? <Link href="/forgot-password">Reset it</Link>
+          Forgot your password? <Link href="/forgot-password" className="text-link">Reset it</Link>
         </p>
         <p className="muted">
-          Need an account? <Link href={signupHref}>Create one</Link>
+          Need an account? <Link href={signupHref} className="text-link">Create one</Link>
         </p>
         <p className="muted">
-          Something broken? <Link href={reportBugHref}>Report a bug</Link>
+          Something broken? <Link href={reportBugHref} className="text-link">Report a bug</Link>
         </p>
       </div>
     </div>

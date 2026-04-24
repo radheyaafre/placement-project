@@ -1,7 +1,6 @@
 import Link from "next/link";
 
 import { AppShell } from "@/components/app-shell";
-import { BugReportForm } from "@/components/bug-report-form";
 import { AuthTabs } from "@/components/auth-tabs";
 import { SectionCard } from "@/components/section-card";
 import { getViewerContext } from "@/lib/auth";
@@ -16,6 +15,8 @@ export default async function ReportBugPage({
 }) {
   const params = await searchParams;
   const viewer = await getViewerContext();
+  const emailHref =
+    "mailto:samyaklabs.ai@gmail.com?subject=Placement%20Prep%20Bug%20Report";
   const nextPath = getSafeNextPath(
     typeof params.next === "string" ? params.next : "",
     "/dashboard"
@@ -34,9 +35,16 @@ export default async function ReportBugPage({
           <p className="muted">
             Something not working? Send the issue directly to
             {" "}
-            <strong>samyaklabs.ai@gmail.com</strong>.
+            <strong>samyaklabs.ai@gmail.com</strong>
+            {" "}
+            with a short note about what happened, what page you were on, and
+            what you expected.
           </p>
-          <BugReportForm source="Signed-in app" textareaId="signed-in-report" />
+          <div className="button-row">
+            <a href={emailHref} className="button">
+              Email SamyakLabs.AI
+            </a>
+          </div>
         </SectionCard>
       </AppShell>
     );
@@ -58,13 +66,19 @@ export default async function ReportBugPage({
         <p className="eyebrow">Report a bug</p>
         <h1 style={{ fontSize: "3.1rem" }}>Tell us what broke.</h1>
         <p className="muted">
-          Type the issue here and it will be sent directly to
+          Email your issue to
           {" "}
-          <strong>samyaklabs.ai@gmail.com</strong>.
+          <strong>samyaklabs.ai@gmail.com</strong>
+          {" "}
+          and mention the page, the action you tried, and any error message you saw.
         </p>
-        <BugReportForm source="Login page" textareaId="login-page-report" />
+        <div className="button-row">
+          <a href={emailHref} className="button">
+            Open email app
+          </a>
+        </div>
         <p className="muted">
-          Need to sign in instead? <Link href={loginHref}>Go to login</Link>
+          Need to sign in instead? <Link href={loginHref} className="text-link">Go to login</Link>
         </p>
       </div>
     </div>

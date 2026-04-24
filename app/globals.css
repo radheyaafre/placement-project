@@ -111,6 +111,22 @@ a {
   text-decoration: none;
 }
 
+.text-link {
+  color: var(--accent-deep);
+  text-decoration: underline;
+  text-decoration-color: rgba(255, 194, 102, 0.72);
+  text-underline-offset: 0.18em;
+  transition:
+    color 150ms ease,
+    text-decoration-color 150ms ease;
+}
+
+.text-link:hover,
+.text-link:focus-visible {
+  color: #ffe1ad;
+  text-decoration-color: rgba(255, 225, 173, 0.92);
+}
+
 img {
   max-width: 100%;
   display: block;

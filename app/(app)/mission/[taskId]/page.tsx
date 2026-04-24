@@ -53,11 +53,16 @@ export default async function MissionPage({
   const questions = detail.mission.questions ?? [];
   const solution = detail.mission.solution ?? [];
   const usesDirectFlow = usesDirectCompleteFlow(detail.mission.taskType);
+  const isHrMission = detail.mission.taskType === "hr";
   const introCopy = usesDirectFlow
     ? "Open the original problem link, solve it there, then come back and mark the day finished."
     : detail.canRevealSolution
-      ? "Your first attempt is already saved. Review the explanation carefully, then finish the day."
-      : "Attempt the questions honestly before opening the explanation.";
+      ? isHrMission
+        ? "Your answer is already saved. Review it with the hint below, then finish the day."
+        : "Your first attempt is already saved. Review the explanation carefully, then finish the day."
+      : isHrMission
+        ? "Write your answer in your own words before opening the hint."
+        : "Attempt the questions honestly before opening the explanation.";
 
   return (
     <div className="mission-layout">
@@ -120,14 +125,21 @@ export default async function MissionPage({
             </div>
           </SectionCard>
         ) : detail.canRevealSolution ? (
-          <SectionCard title="Attempt saved" eyebrow="Review next">
+          <SectionCard
+            title={isHrMission ? "Answer saved" : "Attempt saved"}
+            eyebrow="Review next"
+          >
             <p>
-              Your one attempt is already saved. Review the solution below and
-              mark the mission finished when you are ready.
+              {isHrMission
+                ? "Your one answer is already saved. Review the hint below and mark the mission finished when you are ready."
+                : "Your one attempt is already saved. Review the solution below and mark the mission finished when you are ready."}
             </p>
           </SectionCard>
         ) : (
-          <SectionCard title="Try first" eyebrow="Attempt before solution">
+          <SectionCard
+            title={isHrMission ? "Write your answer" : "Try first"}
+            eyebrow={isHrMission ? "Prepare before hint" : "Attempt before solution"}
+          >
             <form action={submitMissionAttemptAction} className="question-list">
               <input type="hidden" name="taskId" value={detail.mission.id} />
               {questions.map((question, index) => (
@@ -157,22 +169,28 @@ export default async function MissionPage({
                       className="textarea"
                       name={`answer_${question.id}`}
                       placeholder={
-                        question.placeholder || "Write your answer here..."
+                        question.placeholder ||
+                        (isHrMission
+                          ? "Write or prepare your answer here..."
+                          : "Write your answer here...")
                       }
                     />
                   )}
                 </div>
               ))}
               <SubmitButton
-                label="Save attempt and review"
-                pendingLabel="Saving your attempt..."
+                label={isHrMission ? "Save answer and review hint" : "Save attempt and review"}
+                pendingLabel={isHrMission ? "Saving your answer..." : "Saving your attempt..."}
               />
             </form>
           </SectionCard>
         )}
 
         {!usesDirectFlow && detail.canRevealSolution ? (
-          <SectionCard title="Review" eyebrow="Compare and finish">
+          <SectionCard
+            title={isHrMission ? "Your answer and hint" : "Review"}
+            eyebrow="Compare and finish"
+          >
             <div className="stack">
               {detail.progress?.score !== null ? (
                 <div className="callout">
@@ -204,12 +222,35 @@ export default async function MissionPage({
                       </a>
                     </div>
                   ) : null}
-                  {question.explanation ? <p>{question.explanation}</p> : null}
-                  {question.sampleAnswer ? (
-                    <div className="notice">
-                      <strong>Sample answer:</strong> {question.sampleAnswer}
+                  {isHrMission ? (
+                    <div className="stack">
+                      {detail.responsesByQuestionId[question.id]?.answerText ? (
+                        <div className="notice">
+                          <strong>Your answer:</strong>{" "}
+                          {detail.responsesByQuestionId[question.id]?.answerText}
+                        </div>
+                      ) : null}
+                      {question.explanation ? (
+                        <div className="notice">
+                          <strong>Hint:</strong> {question.explanation}
+                        </div>
+                      ) : null}
+                      {question.sampleAnswer ? (
+                        <p className="muted">
+                          <strong>Example direction:</strong> {question.sampleAnswer}
+                        </p>
+                      ) : null}
                     </div>
-                  ) : null}
+                  ) : (
+                    <>
+                      {question.explanation ? <p>{question.explanation}</p> : null}
+                      {question.sampleAnswer ? (
+                        <div className="notice">
+                          <strong>Sample answer:</strong> {question.sampleAnswer}
+                        </div>
+                      ) : null}
+                    </>
+                  )}
                 </div>
               ))}
               {detail.status === "completed" ? (

@@ -69,7 +69,7 @@ export default async function SignupPage({
           />
         </form>
         <p className="muted">
-          Already have an account? <Link href={loginHref}>Sign in</Link>
+          Already have an account? <Link href={loginHref} className="text-link">Sign in</Link>
         </p>
       </div>
     </div>
