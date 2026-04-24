@@ -20,7 +20,8 @@ import {
   calculateCurrentDay,
   calculateCurrentStreak,
   calculateWeekNumber,
-  deriveMissionStatus
+  deriveMissionStatus,
+  usesDirectCompleteFlow
 } from "@/lib/plan";
 import {
   demoMissions,
@@ -373,16 +374,19 @@ export async function getMissionDetail(taskId: string): Promise<MissionDetail | 
     progress,
     snapshot.hasFullAccess
   );
+  const usesDirectFlow = usesDirectCompleteFlow(mission.taskType);
 
   return {
     snapshot,
     mission,
     status,
     progress,
-    canRevealSolution:
-      status === "solution_unlocked" || status === "completed",
-    canMarkComplete:
-      status === "solution_unlocked" || status === "completed"
+    canRevealSolution: usesDirectFlow
+      ? false
+      : status === "solution_unlocked" || status === "completed",
+    canMarkComplete: usesDirectFlow
+      ? status !== "locked"
+      : status === "solution_unlocked" || status === "completed"
   };
 }
 

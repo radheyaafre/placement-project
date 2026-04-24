@@ -4,7 +4,7 @@ import { SectionCard } from "@/components/section-card";
 import { StatusBadge } from "@/components/status-badge";
 import { getDashboardSnapshot } from "@/lib/data";
 import { deriveMissionStatus } from "@/lib/plan";
-import { formatPlanDate, formatTaskType, parseLocalDate, shiftDays } from "@/lib/utils";
+import { formatPlanDate, parseLocalDate, shiftDays } from "@/lib/utils";
 
 export default async function DashboardPage() {
   const snapshot = await getDashboardSnapshot();
@@ -14,9 +14,6 @@ export default async function DashboardPage() {
   }
 
   const planStartDate = parseLocalDate(snapshot.startDate);
-  const todayMissionDate = formatPlanDate(
-    shiftDays(planStartDate, snapshot.todayMission.dayNumber - 1)
-  );
   const dashboardMissions = snapshot.hasFullAccess
     ? snapshot.missions
     : snapshot.missions.filter(
@@ -34,10 +31,7 @@ export default async function DashboardPage() {
       const scheduledFor = formatPlanDate(
         shiftDays(planStartDate, mission.dayNumber - 1)
       );
-      const metaParts = [
-        formatTaskType(mission.taskType),
-        `${mission.estimatedMinutes} min`
-      ];
+      const metaParts = [`${mission.estimatedMinutes} min`];
 
       if (typeof progress?.score === "number") {
         metaParts.push(`Score ${progress.score}%`);
@@ -68,11 +62,6 @@ export default async function DashboardPage() {
     <div className="stack">
       <section className="hero-panel app-hero app-hero--dashboard dashboard-hero">
         <div className="hero-copy dashboard-hero__copy">
-          <h1 className="dashboard-hero__title">{snapshot.todayMission.title}</h1>
-          <p className="dashboard-hero__meta">
-            {formatTaskType(snapshot.todayMission.taskType)} •{" "}
-            {snapshot.todayMission.estimatedMinutes} min • {todayMissionDate}
-          </p>
           <div className="button-row">
             <Link
               href={`/mission/${snapshot.todayMission.id}`}

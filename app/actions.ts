@@ -13,7 +13,7 @@ import {
   isBugReportConfigured,
   isSupabaseConfigured
 } from "@/lib/env";
-import { scoreAptitudeMission } from "@/lib/plan";
+import { scoreAptitudeMission, usesDirectCompleteFlow } from "@/lib/plan";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
   buildRedirect,
@@ -478,6 +478,22 @@ export async function submitMissionAttemptAction(formData: FormData) {
     redirect("/dashboard");
   }
 
+  if (usesDirectCompleteFlow(detail.mission.taskType)) {
+    redirect(
+      buildRedirect(`/mission/${taskId}`, {
+        error: "Open the linked problem, solve it, and mark it finished."
+      })
+    );
+  }
+
+  if ((detail.progress?.attemptCount || 0) > 0) {
+    redirect(
+      buildRedirect(`/mission/${taskId}`, {
+        submitted: "Your one attempt is already saved. Review it and finish the mission."
+      })
+    );
+  }
+
   const answers = readAnswers(
     formData,
     detail.mission.questions.map((question) => question.id)
@@ -530,7 +546,15 @@ export async function submitMissionAttemptAction(formData: FormData) {
     .eq("task_id", taskId)
     .maybeSingle();
 
-  const attemptCount = (existingProgress?.attempt_count || 0) + 1;
+  if ((existingProgress?.attempt_count || 0) > 0) {
+    redirect(
+      buildRedirect(`/mission/${taskId}`, {
+        submitted: "Your one attempt is already saved. Review it and finish the mission."
+      })
+    );
+  }
+
+  const attemptCount = 1;
   const now = new Date().toISOString();
 
   const scoring =

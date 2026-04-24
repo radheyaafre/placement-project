@@ -21,12 +21,10 @@ export function AppShell({
         <div className="brand-lockup">
           <Link href="/" className="brand-mark">
             <span className="brand-mark__dot" aria-hidden="true" />
-            <span className="brand-mark__text">samyaklabs.ai</span>
+            <span className="brand-mark__text">SamyakLabs.AI</span>
           </Link>
           <div>
-            <p className="eyebrow">
-              Placement prep, only one hour daily for 90 days
-            </p>
+            <p className="eyebrow">Placement prep, one focused hour a day for 90 days</p>
             <p className="muted">
               {mode === "demo"
                 ? "Explore the student flow in demo mode."

@@ -1,5 +1,15 @@
-import type { DemoState, Mission, MissionProgress, MissionStatus } from "@/types/domain";
+import type {
+  DemoState,
+  Mission,
+  MissionProgress,
+  MissionStatus,
+  TaskType
+} from "@/types/domain";
 import { parseLocalDate, percent, toDateOnly } from "@/lib/utils";
+
+export function usesDirectCompleteFlow(taskType: TaskType) {
+  return taskType === "dsa" || taskType === "sql";
+}
 
 export function calculateCurrentDay(
   startDate: string,
