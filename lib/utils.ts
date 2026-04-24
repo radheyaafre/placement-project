@@ -51,6 +51,29 @@ export function formatWeekday(day: number) {
   ][day]!;
 }
 
+export function formatPlanDate(date: Date) {
+  const months = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec"
+  ] as const;
+
+  const day = `${date.getDate()}`.padStart(2, "0");
+  const month = months[date.getMonth()]!;
+  const year = date.getFullYear();
+
+  return `${day}-${month}-${year} ${formatWeekday(date.getDay())}`;
+}
+
 export function formatHour12(hour: number) {
   const normalized = ((hour % 24) + 24) % 24;
   const suffix = normalized >= 12 ? "PM" : "AM";
