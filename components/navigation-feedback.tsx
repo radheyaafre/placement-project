@@ -41,7 +41,7 @@ export function NavigationFeedback() {
 
     const timeout = window.setTimeout(() => {
       setPending(false);
-    }, 220);
+    }, 520);
 
     return () => {
       window.clearTimeout(timeout);

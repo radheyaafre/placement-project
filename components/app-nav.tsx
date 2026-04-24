@@ -29,6 +29,7 @@ export function AppNav({ isAdmin }: { isAdmin: boolean }) {
           key={item.href}
           href={item.href}
           aria-current={isActivePath(pathname, item.href) ? "page" : undefined}
+          data-loading-label={`Opening ${item.label}`}
         >
           {item.label}
         </Link>
@@ -37,6 +38,7 @@ export function AppNav({ isAdmin }: { isAdmin: boolean }) {
         <Link
           href="/admin/content"
           aria-current={isActivePath(pathname, "/admin") ? "page" : undefined}
+          data-loading-label="Opening admin content"
         >
           Admin Content
         </Link>

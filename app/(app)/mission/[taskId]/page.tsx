@@ -145,7 +145,9 @@ export default async function MissionPage({
               {questions.map((question, index) => (
                 <div key={question.id} className="question-card">
                   <div className="question-card__meta">
-                    <span className="eyebrow">Question {index + 1}</span>
+                    <span className="eyebrow">
+                      {isHrMission ? `HR question ${index + 1}` : `Question ${index + 1}`}
+                    </span>
                     <strong>{question.prompt}</strong>
                   </div>
 
@@ -207,7 +209,9 @@ export default async function MissionPage({
               {questions.map((question, index) => (
                 <div key={question.id} className="question-card">
                   <div className="question-card__meta">
-                    <span className="eyebrow">Review {index + 1}</span>
+                    <span className="eyebrow">
+                      {isHrMission ? `HR question ${index + 1}` : `Review ${index + 1}`}
+                    </span>
                     <strong>{question.prompt}</strong>
                   </div>
                   {question.sourceUrl ? (

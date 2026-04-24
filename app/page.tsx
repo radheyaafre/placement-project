@@ -75,21 +75,55 @@ export default async function HomePage() {
           </div>
 
           <aside className="landing-sidecard">
-            <p className="eyebrow">How it works</p>
-            <h2 className="landing-sidecard__title">A simple kickstart for daily placement prep.</h2>
-            <div className="landing-sidecard__copy">
-              <p>You get one simple task each day for 90 days.</p>
-              <p>Finish today&apos;s task and the next day unlocks after that.</p>
-              <p>Progress stays visible, so small daily wins keep adding up.</p>
-              <p>
-                This is a beta support tool. It gives clarity and momentum, but you
-                still need deeper study, projects, and serious practice outside it.
+            <p className="eyebrow">Why this exists</p>
+            <h2 className="landing-sidecard__title">A free 90-day kickstart for placement prep.</h2>
+            <div className="landing-sidecard__copy landing-sidecard__copy--story">
+              <p className="landing-sidecard__lead">
+                Let&apos;s be real. Too many resources, too many tabs, and still too
+                much confusion. Add distractions and inconsistency, and it becomes
+                easy to lose track. Even 30 to 40 minutes of focused work every day
+                can make a real difference.
               </p>
               <p>
-                The app does not judge your skill level. It just helps you study at
-                your own pace and keep moving.
+                To make the start easier, this free 90-day program is built to help
+                you begin and stay consistent. Starting at least 6 months before
+                placements is ideal, but if you have not started yet, this is still
+                a good time to begin.
               </p>
-              <p>If something breaks, use Report a bug in the app or mail me directly.</p>
+              <div className="landing-sidecard__section">
+                <p className="landing-sidecard__section-title">How it works</p>
+                <ul className="landing-sidecard__list">
+                  <li>
+                    Once you enroll, you get one simple task every day for 90 days
+                    across aptitude, DSA, SQL, HR, and more.
+                  </li>
+                  <li>
+                    Finish today&apos;s task, and the next day unlocks after that.
+                  </li>
+                  <li>
+                    Your daily progress stays visible, so small wins keep adding up.
+                  </li>
+                </ul>
+              </div>
+              <p>
+                This is not the full placement journey by itself. You will still
+                need deeper study, projects, and serious practice outside the app.
+                Think of this as a kickstart that reduces confusion and makes the
+                next step clearer.
+              </p>
+              <p>
+                The app does not judge or rate your skills. It is here to support
+                your self-study, help you stay steady, and let you prepare at your
+                own pace.
+              </p>
+              <p>
+                This is a beta version, so if something breaks, use Report a bug in
+                the app or mail me directly. Feedback and suggestions are always
+                welcome.
+              </p>
+              <p className="landing-sidecard__closing">
+                All the best. Stay consistent and go get that offer.
+              </p>
             </div>
           </aside>
         </div>
