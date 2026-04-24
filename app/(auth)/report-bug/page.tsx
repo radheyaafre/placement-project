@@ -1,7 +1,10 @@
 import Link from "next/link";
 
+import { AppShell } from "@/components/app-shell";
 import { BugReportForm } from "@/components/bug-report-form";
 import { AuthTabs } from "@/components/auth-tabs";
+import { SectionCard } from "@/components/section-card";
+import { getViewerContext } from "@/lib/auth";
 import { buildRedirect, getSafeNextPath } from "@/lib/utils";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
@@ -12,12 +15,32 @@ export default async function ReportBugPage({
   searchParams: SearchParams;
 }) {
   const params = await searchParams;
+  const viewer = await getViewerContext();
   const nextPath = getSafeNextPath(
     typeof params.next === "string" ? params.next : "",
     "/dashboard"
   );
   const loginHref = buildRedirect("/login", { next: nextPath });
   const reportBugHref = buildRedirect("/report-bug", { next: nextPath });
+
+  if (viewer.userId) {
+    return (
+      <AppShell
+        displayName={viewer.displayName}
+        isAdmin={viewer.isAdmin}
+        mode={viewer.mode}
+      >
+        <SectionCard title="Report a bug" eyebrow="Support">
+          <p className="muted">
+            Something not working? Send the issue directly to
+            {" "}
+            <strong>samyaklabs.ai@gmail.com</strong>.
+          </p>
+          <BugReportForm source="Signed-in app" textareaId="signed-in-report" />
+        </SectionCard>
+      </AppShell>
+    );
+  }
 
   return (
     <div className="auth-shell">

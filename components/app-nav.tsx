@@ -18,7 +18,8 @@ export function AppNav({ isAdmin }: { isAdmin: boolean }) {
     { href: "/dashboard", label: "Dashboard" },
     { href: "/progress", label: "Progress" },
     { href: "/settings", label: "Settings" },
-    { href: "/onboarding", label: "Onboarding" }
+    { href: "/onboarding", label: "Onboarding" },
+    { href: "/report-bug", label: "Report bug" }
   ];
 
   return (
