@@ -48,14 +48,9 @@ export default async function DashboardPage() {
       );
       const metaParts = [`${mission.estimatedMinutes} min`];
 
-      if (typeof progress?.score === "number") {
-        metaParts.push(`Score ${progress.score}%`);
-      }
-
       return {
         mission,
         status,
-        score: progress?.score ?? null,
         isLocked: status === "locked",
         metaText: metaParts.join(" | "),
         scheduledFor

@@ -22,6 +22,7 @@ import {
   calculateCurrentStreak,
   calculateWeekNumber,
   deriveMissionStatus,
+  getEffectiveProgress,
   usesDirectCompleteFlow
 } from "@/lib/plan";
 import {
@@ -91,6 +92,21 @@ function buildDashboardSnapshot(args: {
   missions: Mission[];
   progressByTaskId: Record<string, MissionProgress>;
 }): DashboardSnapshot {
+  const effectiveProgressByTaskId = args.missions.reduce<
+    Record<string, MissionProgress>
+  >((acc, mission) => {
+    const progress = getEffectiveProgress(
+      mission,
+      args.progressByTaskId[mission.id] || null
+    );
+
+    if (progress) {
+      acc[mission.id] = progress;
+    }
+
+    return acc;
+  }, {});
+
   const currentDay = calculateCurrentDay(
     args.startDate,
     args.totalDays,
@@ -98,16 +114,16 @@ function buildDashboardSnapshot(args: {
   );
   const visibilityDay = args.profile.fullAccess ? args.totalDays : currentDay;
   const currentWeek = calculateWeekNumber(currentDay);
-  const completedCount = Object.values(args.progressByTaskId).filter(
+  const completedCount = Object.values(effectiveProgressByTaskId).filter(
     (progress) => progress.status === "completed"
   ).length;
-  const inProgressCount = Object.values(args.progressByTaskId).filter(
+  const inProgressCount = Object.values(effectiveProgressByTaskId).filter(
     (progress) =>
       progress.status === "attempted" ||
       progress.status === "solution_unlocked"
   ).length;
   const weeklyCompletedCount = args.missions.filter((mission) => {
-    const progress = args.progressByTaskId[mission.id];
+    const progress = effectiveProgressByTaskId[mission.id];
     return (
       mission.weekNumber === currentWeek && progress?.status === "completed"
     );
@@ -118,7 +134,7 @@ function buildDashboardSnapshot(args: {
       return false;
     }
 
-    return args.progressByTaskId[mission.id]?.status !== "completed";
+    return effectiveProgressByTaskId[mission.id]?.status !== "completed";
   }).length;
 
   const todayMission =
@@ -137,7 +153,7 @@ function buildDashboardSnapshot(args: {
     completed: args.missions.filter(
       (mission) =>
         mission.taskType === taskType &&
-        args.progressByTaskId[mission.id]?.status === "completed"
+        effectiveProgressByTaskId[mission.id]?.status === "completed"
     ).length
   }));
 
@@ -145,10 +161,10 @@ function buildDashboardSnapshot(args: {
     .filter(
       (mission) =>
         mission.dayNumber <= visibilityDay ||
-        Boolean(args.progressByTaskId[mission.id])
+        Boolean(effectiveProgressByTaskId[mission.id])
     )
     .map((mission) => {
-      const progress = args.progressByTaskId[mission.id] || null;
+      const progress = effectiveProgressByTaskId[mission.id] || null;
 
       return {
         mission,
@@ -175,7 +191,7 @@ function buildDashboardSnapshot(args: {
     currentWeek,
     currentStreak: calculateCurrentStreak(
       args.missions,
-      args.progressByTaskId,
+      effectiveProgressByTaskId,
       currentDay
     ),
     completedCount,
@@ -184,7 +200,7 @@ function buildDashboardSnapshot(args: {
     pendingCount,
     todayMission,
     missions: args.missions,
-    progressByTaskId: args.progressByTaskId,
+    progressByTaskId: effectiveProgressByTaskId,
     categoryBreakdown,
     visibleMissionStates
   };

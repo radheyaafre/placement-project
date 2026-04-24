@@ -11,6 +11,28 @@ export function usesDirectCompleteFlow(taskType: TaskType) {
   return taskType === "dsa" || taskType === "sql";
 }
 
+export function getEffectiveProgress(
+  mission: Mission,
+  progress: MissionProgress | null
+) {
+  if (!progress) {
+    return null;
+  }
+
+  if (
+    !usesDirectCompleteFlow(mission.taskType) &&
+    progress.status === "solution_unlocked"
+  ) {
+    return {
+      ...progress,
+      status: "completed" as MissionProgress["status"],
+      completedAt: progress.completedAt || progress.solutionUnlockedAt || new Date().toISOString()
+    };
+  }
+
+  return progress;
+}
+
 export function calculateCurrentDay(
   startDate: string,
   totalDays: number,

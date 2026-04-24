@@ -28,6 +28,21 @@ function formatPracticePlatform(sourcePlatform?: string) {
   return "practice link";
 }
 
+function getReviewOptionTone(params: {
+  isCorrect: boolean;
+  isSelected: boolean;
+}) {
+  if (params.isCorrect) {
+    return "review-option review-option--correct";
+  }
+
+  if (params.isSelected) {
+    return "review-option review-option--incorrect";
+  }
+
+  return "review-option";
+}
+
 export default async function MissionPage({
   params,
   searchParams
@@ -55,13 +70,13 @@ export default async function MissionPage({
   const usesDirectFlow = usesDirectCompleteFlow(detail.mission.taskType);
   const isHrMission = detail.mission.taskType === "hr";
   const introCopy = usesDirectFlow
-    ? "Open the original problem link, solve it there, then come back and mark the day finished."
+    ? "Open the original problem link, solve it there, then mark the day done here."
     : detail.canRevealSolution
       ? isHrMission
-        ? "Your answer is already saved. Review it with the hint below, then finish the day."
-        : "Your first attempt is already saved. Review the explanation carefully, then finish the day."
+        ? "Your answers are saved and this day is completed. Review them with the guidance below anytime."
+        : "Your attempt is saved and the day is completed. Review the explanation below anytime."
       : isHrMission
-        ? "Write your answer in your own words before opening the hint."
+        ? "Prepare this for yourself. Write each answer down so you can revisit it before interviews."
         : "Attempt the questions honestly before opening the explanation.";
 
   return (
@@ -117,8 +132,8 @@ export default async function MissionPage({
                 <form action={completeMissionAction}>
                   <input type="hidden" name="taskId" value={detail.mission.id} />
                   <SubmitButton
-                    label="Mark day finished"
-                    pendingLabel="Saving progress..."
+                    label="I finished this task"
+                    pendingLabel="Saving completion..."
                   />
                 </form>
               )}
@@ -126,22 +141,28 @@ export default async function MissionPage({
           </SectionCard>
         ) : detail.canRevealSolution ? (
           <SectionCard
-            title={isHrMission ? "Answer saved" : "Attempt saved"}
+            title={isHrMission ? "Answers saved" : "Attempt saved"}
             eyebrow="Review next"
           >
             <p>
               {isHrMission
-                ? "Your one answer is already saved. Review the hint below and mark the mission finished when you are ready."
-                : "Your one attempt is already saved. Review the solution below and mark the mission finished when you are ready."}
+                ? "Your answers are already saved and this day is already completed. Review the guidance below anytime."
+                : "Your one attempt is already saved and this day is already completed. Review the solution below anytime."}
             </p>
           </SectionCard>
         ) : (
           <SectionCard
-            title={isHrMission ? "Write your answer" : "Try first"}
-            eyebrow={isHrMission ? "Prepare before hint" : "Attempt before solution"}
+            title={isHrMission ? "Write your answers" : "Try first"}
+            eyebrow={isHrMission ? "Prepare before you submit" : "Attempt before solution"}
           >
             <form action={submitMissionAttemptAction} className="question-list">
               <input type="hidden" name="taskId" value={detail.mission.id} />
+              {isHrMission ? (
+                <div className="notice hr-prep-note">
+                  Prepare this for yourself. Write it down clearly so you can
+                  revisit it before interviews.
+                </div>
+              ) : null}
               {questions.map((question, index) => (
                 <div key={question.id} className="question-card">
                   <div className="question-card__meta">
@@ -166,6 +187,35 @@ export default async function MissionPage({
                         </label>
                       ))}
                     </div>
+                  ) : isHrMission ? (
+                    <div className="hr-answer-layout">
+                      <div className="hr-answer-main">
+                        <textarea
+                          className="textarea"
+                          name={`answer_${question.id}`}
+                          required
+                          placeholder={
+                            question.placeholder || "Write or prepare your answer here..."
+                          }
+                        />
+                      </div>
+                      <div className="hr-answer-side">
+                        <div className="hint-card">
+                          <span className="eyebrow">Hint / direction</span>
+                          <p>
+                            {question.explanation ||
+                              question.sampleAnswer ||
+                              "Keep it honest, specific, and based on a real example from your work, project, or college life."}
+                          </p>
+                        </div>
+                        {question.explanation && question.sampleAnswer ? (
+                          <div className="hint-card hint-card--soft">
+                            <span className="eyebrow">Example direction</span>
+                            <p>{question.sampleAnswer}</p>
+                          </div>
+                        ) : null}
+                      </div>
+                    </div>
                   ) : (
                     <textarea
                       className="textarea"
@@ -181,8 +231,8 @@ export default async function MissionPage({
                 </div>
               ))}
               <SubmitButton
-                label={isHrMission ? "Save answer and review hint" : "Save attempt and review"}
-                pendingLabel={isHrMission ? "Saving your answer..." : "Saving your attempt..."}
+                label={isHrMission ? "Save answers and complete" : "Save attempt and complete"}
+                pendingLabel={isHrMission ? "Saving your answers..." : "Saving your attempt..."}
               />
             </form>
           </SectionCard>
@@ -190,19 +240,10 @@ export default async function MissionPage({
 
         {!usesDirectFlow && detail.canRevealSolution ? (
           <SectionCard
-            title={isHrMission ? "Your answer and hint" : "Review"}
-            eyebrow="Compare and finish"
+            title={isHrMission ? "Your answers and guidance" : "Review"}
+            eyebrow="Compare anytime"
           >
             <div className="stack">
-              {detail.progress?.score !== null ? (
-                <div className="callout">
-                  <p className="eyebrow">Aptitude score</p>
-                  <h3>{detail.progress?.score}%</h3>
-                  <p className="muted">
-                    Review each explanation before moving to the next day.
-                  </p>
-                </div>
-              ) : null}
               {solution.map((paragraph) => (
                 <p key={paragraph}>{paragraph}</p>
               ))}
@@ -234,12 +275,13 @@ export default async function MissionPage({
                           {detail.responsesByQuestionId[question.id]?.answerText}
                         </div>
                       ) : null}
-                      {question.explanation ? (
+                      {question.explanation || question.sampleAnswer ? (
                         <div className="notice">
-                          <strong>Hint:</strong> {question.explanation}
+                          <strong>Hint / direction:</strong>{" "}
+                          {question.explanation || question.sampleAnswer}
                         </div>
                       ) : null}
-                      {question.sampleAnswer ? (
+                      {question.explanation && question.sampleAnswer ? (
                         <p className="muted">
                           <strong>Example direction:</strong> {question.sampleAnswer}
                         </p>
@@ -247,7 +289,52 @@ export default async function MissionPage({
                     </div>
                   ) : (
                     <>
-                      {question.explanation ? <p>{question.explanation}</p> : null}
+                      {question.questionType === "mcq" ? (
+                        <div className="review-options">
+                          {question.options?.map((option) => {
+                            const selectedOptionId =
+                              detail.responsesByQuestionId[question.id]?.selectedOptionId;
+                            const isSelected = selectedOptionId === option.id;
+                            const isCorrect = Boolean(option.isCorrect);
+
+                            return (
+                              <div
+                                key={option.id}
+                                className={getReviewOptionTone({
+                                  isCorrect,
+                                  isSelected
+                                })}
+                              >
+                                <div className="review-option__copy">
+                                  <strong>{option.label}.</strong> {option.text}
+                                </div>
+                                <div className="pill-row">
+                                  {isSelected ? (
+                                    <span className="review-option__badge review-option__badge--selected">
+                                      Your choice
+                                    </span>
+                                  ) : null}
+                                  {isCorrect ? (
+                                    <span className="review-option__badge review-option__badge--correct">
+                                      Correct
+                                    </span>
+                                  ) : null}
+                                </div>
+                              </div>
+                            );
+                          })}
+                          {!detail.responsesByQuestionId[question.id]?.selectedOptionId ? (
+                            <div className="notice">
+                              No option was selected for this question.
+                            </div>
+                          ) : null}
+                        </div>
+                      ) : null}
+                      {question.explanation ? (
+                        <div className="notice">
+                          <strong>Hint:</strong> {question.explanation}
+                        </div>
+                      ) : null}
                       {question.sampleAnswer ? (
                         <div className="notice">
                           <strong>Sample answer:</strong> {question.sampleAnswer}
@@ -257,17 +344,7 @@ export default async function MissionPage({
                   )}
                 </div>
               ))}
-              {detail.status === "completed" ? (
-                <div className="notice">Mission already completed.</div>
-              ) : (
-                <form action={completeMissionAction}>
-                  <input type="hidden" name="taskId" value={detail.mission.id} />
-                  <SubmitButton
-                    label="Mark day finished"
-                    pendingLabel="Marking finished..."
-                  />
-                </form>
-              )}
+              <div className="notice">Mission already completed.</div>
             </div>
           </SectionCard>
         ) : null}

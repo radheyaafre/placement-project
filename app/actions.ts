@@ -13,7 +13,7 @@ import {
   isBugReportConfigured,
   isSupabaseConfigured
 } from "@/lib/env";
-import { scoreAptitudeMission, usesDirectCompleteFlow } from "@/lib/plan";
+import { usesDirectCompleteFlow } from "@/lib/plan";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
   buildRedirect,
@@ -479,10 +479,18 @@ export async function submitMissionAttemptAction(formData: FormData) {
     );
   }
 
+  const isHrMission = detail.mission.taskType === "hr";
+  const alreadySavedMessage = isHrMission
+    ? "Your answers are already saved. Review them anytime."
+    : "Your attempt is already saved. Review it anytime.";
+  const completedMessage = isHrMission
+    ? "Answers saved and day completed."
+    : "Task saved and completed.";
+
   if ((detail.progress?.attemptCount || 0) > 0) {
     redirect(
       buildRedirect(`/mission/${taskId}`, {
-        submitted: "Your one attempt is already saved. Review it and finish the mission."
+        submitted: alreadySavedMessage
       })
     );
   }
@@ -492,10 +500,18 @@ export async function submitMissionAttemptAction(formData: FormData) {
     detail.mission.questions.map((question) => question.id)
   );
 
+  if (isHrMission && Object.keys(answers).length < detail.mission.questions.length) {
+    redirect(
+      buildRedirect(`/mission/${taskId}`, {
+        error: "Answer all HR questions before saving this day."
+      })
+    );
+  }
+
   if (!Object.keys(answers).length) {
     redirect(
       buildRedirect(`/mission/${taskId}`, {
-        error: "Add at least one answer before unlocking the solution."
+        error: "Add at least one answer before saving this day."
       })
     );
   }
@@ -510,17 +526,11 @@ export async function submitMissionAttemptAction(formData: FormData) {
     const viewer = isSupabaseConfigured()
       ? await getViewerContext()
       : null;
-    const nextScores = { ...current.scores };
-
-    if (detail.mission.taskType === "aptitude") {
-      nextScores[taskId] = scoreAptitudeMission(detail.mission, answers).score;
-    }
 
     await setDemoState({
       ...current,
-      attemptedTaskIds: unique([...current.attemptedTaskIds, taskId]),
       unlockedTaskIds: unique([...current.unlockedTaskIds, taskId]),
-      scores: nextScores,
+      completedTaskIds: unique([...current.completedTaskIds, taskId]),
       responsesByTaskId: {
         ...(current.responsesByTaskId || {}),
         [taskId]: answers
@@ -533,7 +543,8 @@ export async function submitMissionAttemptAction(formData: FormData) {
 
     revalidatePath(`/mission/${taskId}`);
     revalidatePath("/dashboard");
-    redirect(buildRedirect(`/mission/${taskId}`, { submitted: "Attempt saved." }));
+    revalidatePath("/progress");
+    redirect(buildRedirect(`/mission/${taskId}`, { completed: completedMessage }));
   }
 
   const viewer = await getViewerContext();
@@ -553,7 +564,7 @@ export async function submitMissionAttemptAction(formData: FormData) {
   if ((existingProgress?.attempt_count || 0) > 0) {
     redirect(
       buildRedirect(`/mission/${taskId}`, {
-        submitted: "Your one attempt is already saved. Review it and finish the mission."
+        submitted: alreadySavedMessage
       })
     );
   }
@@ -561,24 +572,16 @@ export async function submitMissionAttemptAction(formData: FormData) {
   const attemptCount = 1;
   const now = new Date().toISOString();
 
-  const scoring =
-    detail.mission.taskType === "aptitude"
-      ? scoreAptitudeMission(detail.mission, answers)
-      : null;
-
-  const nextStatus = existingProgress?.completed_at
-    ? "completed"
-    : "solution_unlocked";
-
   const progressPayload = {
     user_id: viewer.userId,
     task_id: taskId,
     plan_day_id: detail.mission.planDayId,
-    status: nextStatus,
+    status: "completed",
     attempt_count: attemptCount,
-    score: scoring?.score ?? null,
+    score: null,
     first_attempt_at: existingProgress?.first_attempt_at || now,
-    solution_unlocked_at: existingProgress?.solution_unlocked_at || now
+    solution_unlocked_at: existingProgress?.solution_unlocked_at || now,
+    completed_at: existingProgress?.completed_at || now
   };
 
   const progressResult = existingProgress?.id
@@ -605,10 +608,6 @@ export async function submitMissionAttemptAction(formData: FormData) {
   const progressId = progressResult.data?.id;
 
   if (progressId) {
-    const correctnessByQuestion = new Map(
-      (scoring?.byQuestion || []).map((result) => [result.questionId, result.isCorrect])
-    );
-
     const attemptsResult = await supabase.from("question_attempts").insert(
       detail.mission.questions.map((question) => ({
         user_id: viewer.userId,
@@ -619,10 +618,7 @@ export async function submitMissionAttemptAction(formData: FormData) {
           question.questionType === "mcq" ? answers[question.id] || null : null,
         answer_text:
           question.questionType === "mcq" ? null : answers[question.id] || null,
-        is_correct:
-          detail.mission.taskType === "aptitude"
-            ? correctnessByQuestion.get(question.id) || false
-            : null
+        is_correct: null
       }))
     );
 
@@ -638,7 +634,7 @@ export async function submitMissionAttemptAction(formData: FormData) {
   revalidatePath(`/mission/${taskId}`);
   revalidatePath("/dashboard");
   revalidatePath("/progress");
-  redirect(buildRedirect(`/mission/${taskId}`, { submitted: "Attempt saved." }));
+  redirect(buildRedirect(`/mission/${taskId}`, { completed: completedMessage }));
 }
 
 export async function completeMissionAction(formData: FormData) {

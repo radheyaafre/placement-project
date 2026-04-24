@@ -103,7 +103,7 @@ export default async function ProgressPage() {
 
       <SectionCard title="Continue where you left off" eyebrow="In progress">
         <div className="task-list">
-          {inProgress.length ? inProgress.map(({ mission, status, score }) => (
+          {inProgress.length ? inProgress.map(({ mission, status }) => (
             <Link
               key={mission.id}
               href={`/mission/${mission.id}`}
@@ -119,7 +119,6 @@ export default async function ProgressPage() {
                 </p>
                 <p className="muted">
                   {formatTaskType(mission.taskType)} • {mission.topic}
-                  {typeof score === "number" ? ` • Score ${score}%` : ""}
                 </p>
               </div>
               <div className="pill-row">
@@ -133,7 +132,7 @@ export default async function ProgressPage() {
 
       <SectionCard title="Completed" eyebrow="Done">
         <div className="task-list">
-          {completed.length ? completed.map(({ mission, status, score }) => (
+          {completed.length ? completed.map(({ mission, status }) => (
             <Link
               key={mission.id}
               href={`/mission/${mission.id}`}
@@ -149,7 +148,6 @@ export default async function ProgressPage() {
                 </p>
                 <p className="muted">
                   {formatTaskType(mission.taskType)}
-                  {typeof score === "number" ? ` • Score ${score}%` : ""}
                 </p>
               </div>
               <div className="pill-row">
