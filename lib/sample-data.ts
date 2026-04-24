@@ -17,7 +17,8 @@ export const demoProfile: StudentProfile = {
   collegeName: "Placement Launchpad Academy",
   targetRole: "Software Engineer",
   timezone: "Asia/Kolkata",
-  role: "admin"
+  role: "admin",
+  fullAccess: true
 };
 
 export const demoReminderSettings: ReminderSettings = {

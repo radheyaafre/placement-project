@@ -54,6 +54,7 @@ export interface StudentProfile {
   targetRole: string;
   timezone: string;
   role: "student" | "admin";
+  fullAccess: boolean;
 }
 
 export interface ReminderSettings {
@@ -79,11 +80,13 @@ export interface ViewerContext {
   displayName: string;
   profile: StudentProfile | null;
   isAdmin: boolean;
+  hasFullAccess: boolean;
 }
 
 export interface DashboardSnapshot {
   mode: UserMode;
   profile: StudentProfile;
+  hasFullAccess: boolean;
   reminderSettings: ReminderSettings;
   planName: string;
   totalDays: number;

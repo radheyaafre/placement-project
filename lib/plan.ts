@@ -71,12 +71,9 @@ export function buildDemoProgressMap(
 export function deriveMissionStatus(
   mission: Mission,
   currentDay: number,
-  progress: MissionProgress | null
+  progress: MissionProgress | null,
+  unlockAll = false
 ): MissionStatus {
-  if (mission.dayNumber > currentDay) {
-    return "locked";
-  }
-
   if (progress?.status === "completed") {
     return "completed";
   }
@@ -87,6 +84,14 @@ export function deriveMissionStatus(
 
   if (progress?.status === "attempted") {
     return "attempted";
+  }
+
+  if (unlockAll) {
+    return "available";
+  }
+
+  if (mission.dayNumber > currentDay) {
+    return "locked";
   }
 
   if (mission.dayNumber < currentDay) {

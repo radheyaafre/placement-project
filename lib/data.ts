@@ -94,6 +94,7 @@ function buildDashboardSnapshot(args: {
     args.totalDays,
     args.profile.timezone || args.reminderSettings.timezone
   );
+  const visibilityDay = args.profile.fullAccess ? args.totalDays : currentDay;
   const currentWeek = calculateWeekNumber(currentDay);
   const completedCount = Object.values(args.progressByTaskId).filter(
     (progress) => progress.status === "completed"
@@ -141,14 +142,20 @@ function buildDashboardSnapshot(args: {
   const visibleMissionStates = args.missions
     .filter(
       (mission) =>
-        mission.dayNumber <= currentDay || Boolean(args.progressByTaskId[mission.id])
+        mission.dayNumber <= visibilityDay ||
+        Boolean(args.progressByTaskId[mission.id])
     )
     .map((mission) => {
       const progress = args.progressByTaskId[mission.id] || null;
 
       return {
         mission,
-        status: deriveMissionStatus(mission, currentDay, progress),
+        status: deriveMissionStatus(
+          mission,
+          currentDay,
+          progress,
+          args.profile.fullAccess
+        ),
         score: progress?.score ?? null
       };
     })
@@ -157,6 +164,7 @@ function buildDashboardSnapshot(args: {
   return {
     mode: args.mode,
     profile: args.profile,
+    hasFullAccess: args.profile.fullAccess,
     reminderSettings: args.reminderSettings,
     planName: args.planName,
     totalDays: args.totalDays,
@@ -191,7 +199,8 @@ export async function getDashboardSnapshot() {
       collegeName: state.profile.collegeName || demoProfile.collegeName,
       targetRole: state.profile.targetRole || demoProfile.targetRole,
       timezone: state.profile.timezone || demoProfile.timezone,
-      role: state.profile.role || demoProfile.role
+      role: state.profile.role || demoProfile.role,
+      fullAccess: state.profile.fullAccess ?? demoProfile.fullAccess
     };
 
     return buildDashboardSnapshot({
@@ -358,7 +367,12 @@ export async function getMissionDetail(taskId: string): Promise<MissionDetail | 
   }
 
   const progress = snapshot.progressByTaskId[taskId] || null;
-  const status = deriveMissionStatus(mission, snapshot.currentDay, progress);
+  const status = deriveMissionStatus(
+    mission,
+    snapshot.currentDay,
+    progress,
+    snapshot.hasFullAccess
+  );
 
   return {
     snapshot,

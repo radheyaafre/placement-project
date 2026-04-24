@@ -17,11 +17,20 @@ export default async function DashboardPage() {
   const todayMissionDate = formatPlanDate(
     shiftDays(planStartDate, snapshot.todayMission.dayNumber - 1)
   );
-  const currentPlan = snapshot.missions
-    .filter((mission) => mission.weekNumber === snapshot.currentWeek)
+  const dashboardMissions = snapshot.hasFullAccess
+    ? snapshot.missions
+    : snapshot.missions.filter(
+        (mission) => mission.weekNumber === snapshot.currentWeek
+      );
+  const currentPlan = dashboardMissions
     .map((mission) => {
       const progress = snapshot.progressByTaskId[mission.id] || null;
-      const status = deriveMissionStatus(mission, snapshot.currentDay, progress);
+      const status = deriveMissionStatus(
+        mission,
+        snapshot.currentDay,
+        progress,
+        snapshot.hasFullAccess
+      );
       const scheduledFor = formatPlanDate(
         shiftDays(planStartDate, mission.dayNumber - 1)
       );
@@ -96,7 +105,7 @@ export default async function DashboardPage() {
         </div>
       </section>
 
-      <SectionCard title="Current plan">
+      <SectionCard title={snapshot.hasFullAccess ? "All 90 days" : "Current plan"}>
         <div className="task-list">
           {currentPlan.map(({ mission, metaText, isLocked, scheduledFor }) => (
             <div

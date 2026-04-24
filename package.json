@@ -9,7 +9,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "generate:rich-seed": "node scripts/generate-rich-seed.mjs"
+    "generate:rich-seed": "node scripts/generate-rich-seed.mjs",
+    "create:test-user": "node scripts/create-full-access-test-user.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "0.10.2",
