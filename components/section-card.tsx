@@ -1,0 +1,28 @@
+import type { ReactNode } from "react";
+
+interface SectionCardProps {
+  title: string;
+  eyebrow?: string;
+  aside?: ReactNode;
+  children: ReactNode;
+}
+
+export function SectionCard({
+  title,
+  eyebrow,
+  aside,
+  children
+}: SectionCardProps) {
+  return (
+    <section className="section-card">
+      <div className="section-card__header">
+        <div>
+          {eyebrow ? <p className="eyebrow">{eyebrow}</p> : null}
+          <h2>{title}</h2>
+        </div>
+        {aside ? <div>{aside}</div> : null}
+      </div>
+      <div className="section-card__body">{children}</div>
+    </section>
+  );
+}

@@ -1,0 +1,4 @@
+day_number,task_type,title,topic,estimated_minutes,instructions,solution
+1,aptitude,Percentages Warm-Up,Percentages and ratio,60,"Answer all ten questions before checking solutions.","Review the arithmetic and note where you lost time."
+2,dsa,Array Patterns: Two Sum,Hashing and arrays,60,"Write brute force first, then the optimized approach.","Use a hash map to track complements and explain O(n) time."
+3,sql,Second Highest Salary,SQL ranking and aggregation,50,"Write the query from memory before checking the guide.","Use a subquery or DENSE_RANK to solve the problem."
