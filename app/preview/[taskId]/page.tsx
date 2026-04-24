@@ -41,7 +41,7 @@ export default async function MissionPreviewPage({
             <p className="eyebrow">Week one sample preview</p>
             <h1 style={{ fontSize: "3.8rem" }}>{mission.title}</h1>
             <p>
-              {formatTaskType(mission.taskType)} • Day {mission.dayNumber} •{" "}
+              {formatTaskType(mission.taskType)} | Day {mission.dayNumber} |{" "}
               {mission.estimatedMinutes} min
             </p>
             <div className="pill-row">
@@ -80,15 +80,11 @@ export default async function MissionPreviewPage({
         </div>
       </section>
 
-      <SectionCard title="How this mission works" eyebrow="Sample mission">
-        <div className="callout">
-          <p className="eyebrow">Mission brief</p>
-          <p>{mission.motivationCopy}</p>
-        </div>
-        <ul>
-          {mission.instructions.map((instruction) => (
-            <li key={instruction}>{instruction}</li>
-          ))}
+      <SectionCard title="What happens after login" eyebrow="Sample mission">
+        <ul className="challenge-list">
+          <li>Students get one clear mission instead of a huge study checklist.</li>
+          <li>They attempt first, review next, and mark the day complete at the end.</li>
+          <li>Future days stay locked so the plan remains simple and focused.</li>
         </ul>
       </SectionCard>
 

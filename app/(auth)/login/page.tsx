@@ -35,6 +35,10 @@ export default async function LoginPage({
   return (
     <div className="auth-shell">
       <div className="auth-card">
+        <Link href="/" className="brand-mark auth-card__brand" data-loading-label="Opening home">
+          <span className="brand-mark__dot" aria-hidden="true" />
+          <span className="brand-mark__text">SamyakLabs.AI</span>
+        </Link>
         <AuthTabs
           items={[
             { href: loginHref, label: "Login", active: true },
@@ -42,10 +46,10 @@ export default async function LoginPage({
           ]}
         />
         <p className="eyebrow">Student login</p>
-        <h1 style={{ fontSize: "3.4rem" }}>Return to today&apos;s mission.</h1>
+        <h1 style={{ fontSize: "3.1rem" }}>Continue your daily queue.</h1>
         <p className="muted">
           {isSupabaseConfigured()
-            ? "Use your email and password to continue the plan."
+            ? "Use your email and password to open today&apos;s placement task."
             : "Supabase is not configured yet, so this screen works as a gateway into demo mode."}
         </p>
         {notice ? <div className="notice">{notice}</div> : null}
@@ -58,7 +62,7 @@ export default async function LoginPage({
           </div>
           <div className="field">
             <label htmlFor="password">Password</label>
-            <input className="input" id="password" name="password" type="password" placeholder="••••••••" />
+            <input className="input" id="password" name="password" type="password" placeholder="Enter your password" />
           </div>
           <SubmitButton
             label={isSupabaseConfigured() ? "Sign in" : "Continue to demo"}

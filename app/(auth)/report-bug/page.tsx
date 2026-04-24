@@ -22,6 +22,10 @@ export default async function ReportBugPage({
   return (
     <div className="auth-shell">
       <div className="auth-card">
+        <Link href="/" className="brand-mark auth-card__brand" data-loading-label="Opening home">
+          <span className="brand-mark__dot" aria-hidden="true" />
+          <span className="brand-mark__text">SamyakLabs.AI</span>
+        </Link>
         <AuthTabs
           items={[
             { href: loginHref, label: "Login" },
@@ -29,7 +33,7 @@ export default async function ReportBugPage({
           ]}
         />
         <p className="eyebrow">Report a bug</p>
-        <h1 style={{ fontSize: "3.4rem" }}>Tell us what broke.</h1>
+        <h1 style={{ fontSize: "3.1rem" }}>Tell us what broke.</h1>
         <p className="muted">
           Type the issue here and it will be sent directly to
           {" "}

@@ -5,6 +5,21 @@ import { StatusBadge } from "@/components/status-badge";
 import { getDashboardSnapshot } from "@/lib/data";
 import { deriveMissionStatus } from "@/lib/plan";
 import { formatPlanDate, parseLocalDate, shiftDays } from "@/lib/utils";
+import type { MissionStatus } from "@/types/domain";
+
+function getQueueState(status: MissionStatus) {
+  switch (status) {
+    case "completed":
+      return { label: "Done", tone: "done" };
+    case "attempted":
+    case "solution_unlocked":
+      return { label: "Started", tone: "started" };
+    case "locked":
+      return { label: "Locked", tone: "locked" };
+    default:
+      return { label: "Open", tone: "open" };
+  }
+}
 
 export default async function DashboardPage() {
   const snapshot = await getDashboardSnapshot();
@@ -37,18 +52,12 @@ export default async function DashboardPage() {
         metaParts.push(`Score ${progress.score}%`);
       }
 
-      if (status === "completed") {
-        metaParts.push("Completed");
-      } else if (status === "attempted" || status === "solution_unlocked") {
-        metaParts.push("Started");
-      }
-
       return {
         mission,
         status,
         score: progress?.score ?? null,
         isLocked: status === "locked",
-        metaText: metaParts.join(" • "),
+        metaText: metaParts.join(" | "),
         scheduledFor
       };
     });
@@ -56,11 +65,28 @@ export default async function DashboardPage() {
   const completedCaption =
     snapshot.completedCount === 1 ? "day completed" : "days completed";
   const consistencyCaption = "completed without skipping";
+  const queueTitle = snapshot.hasFullAccess ? "Full mission queue" : "This week's queue";
+  const queueEyebrow = snapshot.hasFullAccess
+    ? "Tester access"
+    : `Day ${snapshot.currentDay} of ${snapshot.totalDays}`;
+  const queueAside = (
+    <span className="pill">
+      {snapshot.hasFullAccess ? "All days unlocked" : `Week ${snapshot.currentWeek}`}
+    </span>
+  );
 
   return (
     <div className="stack">
       <section className="hero-panel app-hero app-hero--dashboard dashboard-hero">
-        <div className="hero-copy dashboard-hero__copy">
+        <div className="dashboard-toolbar">
+          <div className="hero-copy dashboard-hero__copy">
+            <p className="eyebrow">Mission queue</p>
+            <h1 className="dashboard-hero__title">Keep the next step obvious.</h1>
+            <p className="dashboard-hero__meta">
+              Open today&apos;s task, finish it, and let the rest of the plan unlock
+              one day at a time.
+            </p>
+          </div>
           <div className="button-row">
             <Link
               href={`/mission/${snapshot.todayMission.id}`}
@@ -98,10 +124,12 @@ export default async function DashboardPage() {
         </div>
       </section>
 
-      <SectionCard title={snapshot.hasFullAccess ? "All 90 days" : "Current plan"}>
+      <SectionCard title={queueTitle} eyebrow={queueEyebrow} aside={queueAside}>
         <div className="task-list">
-          {currentPlan.map(({ mission, metaText, isLocked, scheduledFor }) => (
-            isLocked ? (
+          {currentPlan.map(({ mission, metaText, isLocked, scheduledFor, status }) => {
+            const queueState = getQueueState(status);
+
+            return isLocked ? (
               <div
                 key={mission.id}
                 className="task-row task-row--locked"
@@ -116,7 +144,9 @@ export default async function DashboardPage() {
                 </div>
                 <div className="pill-row">
                   <StatusBadge taskType={mission.taskType} />
-                  <span className="button-ghost button-ghost--disabled">Locked</span>
+                  <span className={`queue-status queue-status--${queueState.tone}`}>
+                    {queueState.label}
+                  </span>
                 </div>
               </div>
             ) : (
@@ -135,11 +165,13 @@ export default async function DashboardPage() {
                 </div>
                 <div className="pill-row">
                   <StatusBadge taskType={mission.taskType} />
-                  <span className="button-ghost">Open</span>
+                  <span className={`queue-status queue-status--${queueState.tone}`}>
+                    {queueState.label}
+                  </span>
                 </div>
               </Link>
-            )
-          ))}
+            );
+          })}
         </div>
       </SectionCard>
     </div>

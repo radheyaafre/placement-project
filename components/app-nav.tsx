@@ -22,7 +22,7 @@ export function AppNav({ isAdmin }: { isAdmin: boolean }) {
   ];
 
   return (
-    <nav className="nav-list">
+    <nav className="nav-list" aria-label="Primary">
       {items.map((item) => (
         <Link
           key={item.href}

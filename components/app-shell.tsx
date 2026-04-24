@@ -19,44 +19,45 @@ export function AppShell({
   return (
     <div className="app-shell">
       <header className="app-shell__header">
-        <div className="brand-lockup">
-          <Link href="/" className="brand-mark" data-loading-label="Opening home">
-            <span className="brand-mark__dot" aria-hidden="true" />
-            <span className="brand-mark__text">SamyakLabs.AI</span>
-          </Link>
-          <div>
-            <p className="eyebrow">Placement prep, one focused hour a day for 90 days</p>
-            <p className="muted">
-              {mode === "demo"
-                ? "Explore the student flow in demo mode."
-                : `Welcome back, ${displayName}`}
-            </p>
+        <div className="app-shell__bar">
+          <div className="brand-lockup">
+            <Link href="/" className="brand-mark" data-loading-label="Opening home">
+              <span className="brand-mark__dot" aria-hidden="true" />
+              <span className="brand-mark__text">SamyakLabs.AI</span>
+            </Link>
+            <div className="app-shell__intro">
+              <p className="app-shell__tag">Placement prep, only one focused hour daily for 90 days</p>
+              <p className="muted">
+                {mode === "demo"
+                  ? "Problem-first demo mode."
+                  : `Logged in as ${displayName}`}
+              </p>
+            </div>
+          </div>
+
+          <div className="app-shell__actions">
+            {mode === "supabase" ? (
+              <form action={signOutAction} className="app-shell__signout">
+                <SubmitButton
+                  className="button-ghost"
+                  label="Logout"
+                  pendingLabel="Logging out..."
+                />
+              </form>
+            ) : (
+              <Link href="/" className="button-ghost">
+                Back home
+              </Link>
+            )}
           </div>
         </div>
 
-        <div className="app-shell__actions">
-          {mode === "supabase" ? (
-            <form action={signOutAction} className="app-shell__signout">
-              <SubmitButton
-                className="button-ghost"
-                label="Logout"
-                pendingLabel="Logging out..."
-              />
-            </form>
-          ) : (
-            <Link href="/" className="button-ghost">
-              Back home
-            </Link>
-          )}
+        <div className="app-shell__navrow">
+          <AppNav isAdmin={isAdmin} />
         </div>
       </header>
 
-      <div className="app-shell__content">
-        <aside className="app-sidebar">
-          <AppNav isAdmin={isAdmin} />
-        </aside>
-        <main className="app-main">{children}</main>
-      </div>
+      <main className="app-main">{children}</main>
     </div>
   );
 }

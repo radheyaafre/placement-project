@@ -53,13 +53,18 @@ export default async function MissionPage({
   const questions = detail.mission.questions ?? [];
   const solution = detail.mission.solution ?? [];
   const usesDirectFlow = usesDirectCompleteFlow(detail.mission.taskType);
+  const introCopy = usesDirectFlow
+    ? "Open the original problem link, solve it there, then come back and mark the day finished."
+    : detail.canRevealSolution
+      ? "Your first attempt is already saved. Review the explanation carefully, then finish the day."
+      : "Attempt the questions honestly before opening the explanation.";
 
   return (
     <div className="mission-layout">
       <div className="stack">
         <SectionCard
           title={detail.mission.title}
-          eyebrow={`Day ${detail.mission.dayNumber} • Week ${detail.mission.weekNumber}`}
+          eyebrow={`Day ${detail.mission.dayNumber} | Week ${detail.mission.weekNumber}`}
           aside={
             <div className="pill-row">
               <StatusBadge taskType={detail.mission.taskType} />
@@ -67,14 +72,18 @@ export default async function MissionPage({
             </div>
           }
         >
-          <p className="muted">{detail.mission.topic}</p>
+          <div className="mission-meta">
+            <span className="pill">{detail.mission.estimatedMinutes} min focus</span>
+            <span className="pill">{detail.mission.topic}</span>
+          </div>
+          <p className="mission-intro">{introCopy}</p>
           {error ? <div className="notice">{error}</div> : null}
           {submitted ? <div className="notice">{submitted}</div> : null}
           {completed ? <div className="notice">{completed}</div> : null}
         </SectionCard>
 
         {usesDirectFlow ? (
-          <SectionCard title="Solve and finish" eyebrow="Step 1">
+          <SectionCard title="Open problems" eyebrow="Solve outside the app">
             <div className="question-list">
               {questions.map((question, index) => (
                 <div key={question.id} className="question-card">
@@ -103,7 +112,7 @@ export default async function MissionPage({
                 <form action={completeMissionAction}>
                   <input type="hidden" name="taskId" value={detail.mission.id} />
                   <SubmitButton
-                    label="I solved this, mark finished"
+                    label="Mark day finished"
                     pendingLabel="Saving progress..."
                   />
                 </form>
@@ -111,14 +120,14 @@ export default async function MissionPage({
             </div>
           </SectionCard>
         ) : detail.canRevealSolution ? (
-          <SectionCard title="Attempt saved" eyebrow="Step 1">
+          <SectionCard title="Attempt saved" eyebrow="Review next">
             <p>
               Your one attempt is already saved. Review the solution below and
               mark the mission finished when you are ready.
             </p>
           </SectionCard>
         ) : (
-          <SectionCard title="Attempt" eyebrow="Step 1">
+          <SectionCard title="Try first" eyebrow="Attempt before solution">
             <form action={submitMissionAttemptAction} className="question-list">
               <input type="hidden" name="taskId" value={detail.mission.id} />
               {questions.map((question, index) => (
@@ -155,7 +164,7 @@ export default async function MissionPage({
                 </div>
               ))}
               <SubmitButton
-                label="Submit and review solution"
+                label="Save attempt and review"
                 pendingLabel="Saving your attempt..."
               />
             </form>
@@ -163,7 +172,7 @@ export default async function MissionPage({
         )}
 
         {!usesDirectFlow && detail.canRevealSolution ? (
-          <SectionCard title="Solution Review" eyebrow="Step 2">
+          <SectionCard title="Review" eyebrow="Compare and finish">
             <div className="stack">
               {detail.progress?.score !== null ? (
                 <div className="callout">
@@ -209,7 +218,7 @@ export default async function MissionPage({
                 <form action={completeMissionAction}>
                   <input type="hidden" name="taskId" value={detail.mission.id} />
                   <SubmitButton
-                    label="Mark mission finished"
+                    label="Mark day finished"
                     pendingLabel="Marking finished..."
                   />
                 </form>
@@ -220,7 +229,7 @@ export default async function MissionPage({
       </div>
 
       <aside className="sticky-column">
-        <SectionCard title="Mission snapshot" eyebrow="Overview">
+        <SectionCard title="Mission snapshot" eyebrow="Queue info">
           <div className="stack">
             <div className="topline">
               <span className="muted">Estimated time</span>

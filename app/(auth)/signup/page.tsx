@@ -31,11 +31,15 @@ export default async function SignupPage({
   return (
     <div className="auth-shell">
       <div className="auth-card">
+        <Link href="/" className="brand-mark auth-card__brand" data-loading-label="Opening home">
+          <span className="brand-mark__dot" aria-hidden="true" />
+          <span className="brand-mark__text">SamyakLabs.AI</span>
+        </Link>
         <p className="eyebrow">Create account</p>
-        <h1 style={{ fontSize: "3.4rem" }}>Launch a student into Day 1.</h1>
+        <h1 style={{ fontSize: "3.1rem" }}>Create your 90-day prep workspace.</h1>
         <p className="muted">
           {isSupabaseConfigured()
-            ? "Capture the basics, then route the student into onboarding."
+            ? "Start simple, stay consistent, and unlock one mission at a time."
             : "In demo mode this will skip straight into onboarding with sample data."}
         </p>
         {error ? <div className="notice">{error}</div> : null}

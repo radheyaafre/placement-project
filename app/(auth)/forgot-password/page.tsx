@@ -18,11 +18,15 @@ export default async function ForgotPasswordPage({
   return (
     <div className="auth-shell">
       <div className="auth-card">
+        <Link href="/" className="brand-mark auth-card__brand" data-loading-label="Opening home">
+          <span className="brand-mark__dot" aria-hidden="true" />
+          <span className="brand-mark__text">SamyakLabs.AI</span>
+        </Link>
         <p className="eyebrow">Forgot password</p>
-        <h1 style={{ fontSize: "3.2rem" }}>Send a recovery link.</h1>
+        <h1 style={{ fontSize: "3rem" }}>Reset your password.</h1>
         <p className="muted">
           {isSupabaseConfigured()
-            ? "Enter the student's email and Supabase will send a password reset email."
+            ? "Enter your email and Supabase will send a password reset link."
             : "Supabase is not configured in this environment, so reset emails are unavailable in demo mode."}
         </p>
         {notice ? <div className="notice">{notice}</div> : null}
