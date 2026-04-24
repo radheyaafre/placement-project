@@ -11,7 +11,7 @@ const COOKIE_NAME = "placement-demo-state";
 
 function createDefaultDemoState(): DemoState {
   return {
-    startDate: toDateOnly(shiftDays(new Date(), -4)),
+    startDate: toDateOnly(shiftDays(new Date(), -4), demoProfile.timezone),
     profile: {
       fullName: demoProfile.fullName,
       collegeName: demoProfile.collegeName,

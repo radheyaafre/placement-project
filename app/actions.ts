@@ -178,7 +178,7 @@ export async function saveOnboardingAction(formData: FormData) {
 
     await setDemoState({
       ...current,
-      startDate: toDateOnly(new Date()),
+      startDate: toDateOnly(new Date(), timezone),
       profile: {
         ...current.profile,
         fullName,
@@ -238,7 +238,7 @@ export async function saveOnboardingAction(formData: FormData) {
     );
   }
 
-  const startDate = toDateOnly(new Date());
+  const startDate = toDateOnly(new Date(), timezone);
 
   if (existingPlan?.id) {
     await supabase

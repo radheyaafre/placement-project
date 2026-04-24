@@ -87,7 +87,11 @@ function buildDashboardSnapshot(args: {
   missions: Mission[];
   progressByTaskId: Record<string, MissionProgress>;
 }): DashboardSnapshot {
-  const currentDay = calculateCurrentDay(args.startDate, args.totalDays);
+  const currentDay = calculateCurrentDay(
+    args.startDate,
+    args.totalDays,
+    args.profile.timezone || args.reminderSettings.timezone
+  );
   const currentWeek = calculateWeekNumber(currentDay);
   const completedCount = Object.values(args.progressByTaskId).filter(
     (progress) => progress.status === "completed"
@@ -216,7 +220,7 @@ export async function getDashboardSnapshot() {
     .maybeSingle();
 
   const startDate =
-    planRow?.start_date || toDateOnly(new Date());
+    planRow?.start_date || toDateOnly(new Date(), viewer.profile.timezone);
 
   const { data: planTemplate } = await supabase
     .from("plan_templates")

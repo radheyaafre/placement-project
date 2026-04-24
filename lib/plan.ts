@@ -1,14 +1,24 @@
 import type { DemoState, Mission, MissionProgress, MissionStatus } from "@/types/domain";
-import { parseLocalDate, percent } from "@/lib/utils";
+import { parseLocalDate, percent, toDateOnly } from "@/lib/utils";
 
-export function calculateCurrentDay(startDate: string, totalDays: number, now = new Date()) {
+export function calculateCurrentDay(
+  startDate: string,
+  totalDays: number,
+  timeZone?: string,
+  now = new Date()
+) {
   const start = parseLocalDate(startDate);
+  const today = parseLocalDate(toDateOnly(now, timeZone));
   const startUtc = Date.UTC(
     start.getFullYear(),
     start.getMonth(),
     start.getDate()
   );
-  const nowUtc = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+  const nowUtc = Date.UTC(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate()
+  );
   const rawDay = Math.floor((nowUtc - startUtc) / 86_400_000) + 1;
 
   if (rawDay < 1) {

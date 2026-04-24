@@ -1,9 +1,33 @@
 import type { MissionStatus, TaskType } from "@/types/domain";
 
-export function toDateOnly(date: Date) {
-  const year = date.getFullYear();
-  const month = `${date.getMonth() + 1}`.padStart(2, "0");
-  const day = `${date.getDate()}`.padStart(2, "0");
+function getDateParts(date: Date, timeZone?: string) {
+  if (!timeZone) {
+    return {
+      year: date.getFullYear(),
+      month: date.getMonth() + 1,
+      day: date.getDate()
+    };
+  }
+
+  const formatter = new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  });
+  const parts = formatter.formatToParts(date);
+  const year = Number(parts.find((part) => part.type === "year")?.value || 0);
+  const month = Number(parts.find((part) => part.type === "month")?.value || 1);
+  const day = Number(parts.find((part) => part.type === "day")?.value || 1);
+
+  return { year, month, day };
+}
+
+export function toDateOnly(date: Date, timeZone?: string) {
+  const parts = getDateParts(date, timeZone);
+  const year = parts.year;
+  const month = `${parts.month}`.padStart(2, "0");
+  const day = `${parts.day}`.padStart(2, "0");
   return `${year}-${month}-${day}`;
 }
 
