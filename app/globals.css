@@ -1175,12 +1175,6 @@ button {
   letter-spacing: 0.03em;
 }
 
-.bug-report-section {
-  display: grid;
-  gap: 16px;
-}
-
-.bug-report-copy,
 .bug-report-form {
   max-width: 760px;
 }
@@ -1235,6 +1229,39 @@ button {
   width: min(540px, 100%);
   display: grid;
   gap: 16px;
+}
+
+.auth-tabs {
+  display: inline-flex;
+  gap: 8px;
+  width: fit-content;
+  padding: 6px;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  background: rgba(10, 16, 28, 0.92);
+}
+
+.auth-tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: 999px;
+  color: var(--muted);
+  font-weight: 700;
+  transition: background 150ms ease, color 150ms ease, transform 150ms ease;
+}
+
+.auth-tab:hover {
+  color: var(--ink);
+  transform: translateY(-1px);
+}
+
+.auth-tab--active {
+  background: linear-gradient(145deg, rgba(249, 115, 22, 0.2), rgba(34, 193, 170, 0.16));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  color: #fff5eb;
 }
 
 .mission-layout {

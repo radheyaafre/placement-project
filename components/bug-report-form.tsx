@@ -20,7 +20,13 @@ function SubmitButton() {
   );
 }
 
-export function BugReportForm() {
+export function BugReportForm({
+  source = "Public home page",
+  textareaId = "report"
+}: {
+  source?: string;
+  textareaId?: string;
+}) {
   const formRef = useRef<HTMLFormElement>(null);
   const [state, formAction] = useActionState(submitBugReportAction, initialState);
 
@@ -32,12 +38,12 @@ export function BugReportForm() {
 
   return (
     <form ref={formRef} action={formAction} className="stack bug-report-form">
-      <input type="hidden" name="source" value="Public home page" />
+      <input type="hidden" name="source" value={source} />
       <div className="field">
-        <label htmlFor="report">What went wrong?</label>
+        <label htmlFor={textareaId}>What went wrong?</label>
         <textarea
           className="textarea"
-          id="report"
+          id={textareaId}
           name="report"
           placeholder="Example: After login, Day 2 stays locked even though today's date is correct."
           required

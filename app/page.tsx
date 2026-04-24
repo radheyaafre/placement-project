@@ -1,6 +1,5 @@
 import Link from "next/link";
 
-import { BugReportForm } from "@/components/bug-report-form";
 import { getViewerContext } from "@/lib/auth";
 import { buildRedirect } from "@/lib/utils";
 
@@ -76,21 +75,6 @@ export default async function HomePage() {
             </p>
           </div>
         </div>
-      </section>
-
-      <section className="section-card bug-report-section">
-        <div className="section-card__header">
-          <div>
-            <p className="eyebrow">Report a bug</p>
-            <h2>Something broken?</h2>
-          </div>
-        </div>
-        <p className="muted bug-report-copy">
-          Type the issue here and it will be sent directly to
-          {" "}
-          <strong>samyaklabs.ai@gmail.com</strong>.
-        </p>
-        <BugReportForm />
       </section>
     </div>
   );

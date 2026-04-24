@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { signInAction } from "@/app/actions";
+import { AuthTabs } from "@/components/auth-tabs";
 import { getViewerContext } from "@/lib/auth";
 import { isSupabaseConfigured } from "@/lib/env";
 import { buildRedirect, getSafeNextPath } from "@/lib/utils";
@@ -27,10 +28,18 @@ export default async function LoginPage({
   const error = typeof params.error === "string" ? params.error : "";
   const notice = typeof params.notice === "string" ? params.notice : "";
   const signupHref = buildRedirect("/signup", { next: nextPath });
+  const loginHref = buildRedirect("/login", { next: nextPath });
+  const reportBugHref = buildRedirect("/report-bug", { next: nextPath });
 
   return (
     <div className="auth-shell">
       <div className="auth-card">
+        <AuthTabs
+          items={[
+            { href: loginHref, label: "Login", active: true },
+            { href: reportBugHref, label: "Report bug" }
+          ]}
+        />
         <p className="eyebrow">Student login</p>
         <h1 style={{ fontSize: "3.4rem" }}>Return to today&apos;s mission.</h1>
         <p className="muted">
@@ -59,6 +68,9 @@ export default async function LoginPage({
         </p>
         <p className="muted">
           Need an account? <Link href={signupHref}>Create one</Link>
+        </p>
+        <p className="muted">
+          Something broken? <Link href={reportBugHref}>Report a bug</Link>
         </p>
       </div>
     </div>
