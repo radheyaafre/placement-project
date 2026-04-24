@@ -37,22 +37,80 @@ function createDefaultDemoState(): DemoState {
   };
 }
 
-export async function getDemoState() {
+function createBlankDemoState(): DemoState {
+  return {
+    ...createDefaultDemoState(),
+    attemptedTaskIds: [],
+    unlockedTaskIds: [],
+    completedTaskIds: [],
+    scores: {},
+    responsesByTaskId: {}
+  };
+}
+
+export async function getDemoState(options?: {
+  blankProgress?: boolean;
+  ownerUserId?: string | null;
+}) {
   const store = await cookies();
   const raw = store.get(COOKIE_NAME)?.value;
+  const fallbackState = options?.blankProgress
+    ? createBlankDemoState()
+    : createDefaultDemoState();
 
   if (!raw) {
-    return createDefaultDemoState();
+    if (options?.ownerUserId) {
+      return {
+        ...fallbackState,
+        profile: {
+          ...fallbackState.profile,
+          userId: options.ownerUserId
+        }
+      };
+    }
+
+    return fallbackState;
   }
 
   try {
     const parsed = JSON.parse(raw) as DemoState;
+
+    if (
+      options?.ownerUserId &&
+      parsed.profile?.userId !== options.ownerUserId
+    ) {
+      return {
+        ...fallbackState,
+        profile: {
+          ...fallbackState.profile,
+          userId: options.ownerUserId
+        }
+      };
+    }
+
     return {
-      ...createDefaultDemoState(),
-      ...parsed
+      ...fallbackState,
+      ...parsed,
+      profile: {
+        ...fallbackState.profile,
+        ...parsed.profile,
+        ...(options?.ownerUserId ? { userId: options.ownerUserId } : {})
+      },
+      reminderSettings: {
+        ...fallbackState.reminderSettings,
+        ...parsed.reminderSettings
+      },
+      scores: {
+        ...fallbackState.scores,
+        ...parsed.scores
+      },
+      responsesByTaskId: {
+        ...fallbackState.responsesByTaskId,
+        ...parsed.responsesByTaskId
+      }
     };
   } catch {
-    return createDefaultDemoState();
+    return fallbackState;
   }
 }
 

@@ -507,6 +507,9 @@ export async function submitMissionAttemptAction(formData: FormData) {
 
   if (useFallbackStorage) {
     const current = await getDemoState();
+    const viewer = isSupabaseConfigured()
+      ? await getViewerContext()
+      : null;
     const nextScores = { ...current.scores };
 
     if (detail.mission.taskType === "aptitude") {
@@ -521,6 +524,10 @@ export async function submitMissionAttemptAction(formData: FormData) {
       responsesByTaskId: {
         ...(current.responsesByTaskId || {}),
         [taskId]: answers
+      },
+      profile: {
+        ...current.profile,
+        ...(viewer?.userId ? { userId: viewer.userId } : {})
       }
     });
 
@@ -657,11 +664,18 @@ export async function completeMissionAction(formData: FormData) {
 
   if (useFallbackStorage) {
     const current = await getDemoState();
+    const viewer = isSupabaseConfigured()
+      ? await getViewerContext()
+      : null;
 
     await setDemoState({
       ...current,
       unlockedTaskIds: unique([...current.unlockedTaskIds, taskId]),
-      completedTaskIds: unique([...current.completedTaskIds, taskId])
+      completedTaskIds: unique([...current.completedTaskIds, taskId]),
+      profile: {
+        ...current.profile,
+        ...(viewer?.userId ? { userId: viewer.userId } : {})
+      }
     });
 
     revalidatePath(`/mission/${taskId}`);

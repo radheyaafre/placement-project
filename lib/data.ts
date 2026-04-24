@@ -316,6 +316,11 @@ export async function getDashboardSnapshot() {
   }, {});
 
   if (!missions.length) {
+    const demoState = await getDemoState({
+      blankProgress: true,
+      ownerUserId: viewer.userId
+    });
+
     return buildDashboardSnapshot({
       mode: "supabase",
       profile: viewer.profile,
@@ -330,7 +335,7 @@ export async function getDashboardSnapshot() {
       totalDays: planTemplate?.duration_days || 90,
       startDate,
       missions: demoMissions,
-      progressByTaskId: {}
+      progressByTaskId: buildDemoProgressMap(demoMissions, demoState)
     });
   }
 
@@ -384,7 +389,14 @@ export async function getMissionDetail(taskId: string): Promise<MissionDetail | 
   let responsesByQuestionId: Record<string, MissionQuestionResponse> = {};
 
   if (snapshot.mode === "demo" || !progress?.progressId) {
-    const demoState = await getDemoState();
+    const demoState = await getDemoState(
+      snapshot.mode === "supabase"
+        ? {
+            blankProgress: true,
+            ownerUserId: snapshot.profile.userId
+          }
+        : undefined
+    );
     const savedResponses = demoState.responsesByTaskId?.[taskId] || {};
 
     responsesByQuestionId = mission.questions.reduce<
