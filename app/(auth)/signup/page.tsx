@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { signUpAction } from "@/app/actions";
+import { SubmitButton } from "@/components/submit-button";
 import { getViewerContext } from "@/lib/auth";
 import { isSupabaseConfigured } from "@/lib/env";
 import { buildRedirect, getSafeNextPath } from "@/lib/utils";
@@ -56,9 +57,12 @@ export default async function SignupPage({
             <label htmlFor="timezone">Timezone</label>
             <input className="input" id="timezone" name="timezone" type="text" defaultValue="Asia/Kolkata" />
           </div>
-          <button className="button" type="submit">
-            {isSupabaseConfigured() ? "Create account" : "Open demo onboarding"}
-          </button>
+          <SubmitButton
+            label={isSupabaseConfigured() ? "Create account" : "Open demo onboarding"}
+            pendingLabel={
+              isSupabaseConfigured() ? "Creating account..." : "Opening onboarding..."
+            }
+          />
         </form>
         <p className="muted">
           Already have an account? <Link href={loginHref}>Sign in</Link>

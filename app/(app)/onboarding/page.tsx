@@ -1,6 +1,9 @@
+import Link from "next/link";
+
 import { saveOnboardingAction } from "@/app/actions";
+import { SubmitButton } from "@/components/submit-button";
 import { getSettingsSnapshot } from "@/lib/data";
-import { formatHour12 } from "@/lib/utils";
+import { buildRedirect, formatHour12 } from "@/lib/utils";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -17,6 +20,7 @@ export default async function OnboardingPage({
   const params = await searchParams;
   const settings = await getSettingsSnapshot();
   const error = typeof params.error === "string" ? params.error : "";
+  const reportBugHref = buildRedirect("/report-bug", { next: "/onboarding" });
 
   if (!settings) {
     return null;
@@ -122,10 +126,14 @@ export default async function OnboardingPage({
               </select>
             </div>
           </div>
-          <button className="button" type="submit">
-            Save and start Day 1
-          </button>
+          <SubmitButton
+            label="Save and start Day 1"
+            pendingLabel="Starting Day 1..."
+          />
         </form>
+        <p className="muted">
+          Something not working? <Link href={reportBugHref}>Report a bug</Link>
+        </p>
       </section>
 
       <section className="section-card">

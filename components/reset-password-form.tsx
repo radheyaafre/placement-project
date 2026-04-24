@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { FormEvent } from "react";
 import { useEffect, useState } from "react";
 
+import { LoadingSpinner } from "@/components/loading-spinner";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 type Phase =
@@ -208,7 +209,14 @@ export function ResetPasswordForm() {
             />
           </div>
           <button className="button" type="submit" disabled={phase === "submitting"}>
-            {phase === "submitting" ? "Updating password..." : "Update password"}
+            {phase === "submitting" ? (
+              <>
+                <LoadingSpinner className="spinner--button" label="Updating password" />
+                <span>Updating password...</span>
+              </>
+            ) : (
+              <span>Update password</span>
+            )}
           </button>
         </form>
       ) : null}

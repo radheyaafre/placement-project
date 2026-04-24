@@ -1,24 +1,14 @@
 "use client";
 
 import { useActionState, useEffect, useRef } from "react";
-import { useFormStatus } from "react-dom";
 
 import { submitBugReportAction } from "@/app/actions";
+import { SubmitButton } from "@/components/submit-button";
 
 const initialState = {
   status: "idle",
   message: ""
 } as const;
-
-function SubmitButton() {
-  const { pending } = useFormStatus();
-
-  return (
-    <button className="button" type="submit" disabled={pending}>
-      {pending ? "Sending..." : "Send bug report"}
-    </button>
-  );
-}
 
 export function BugReportForm({
   source = "Public home page",
@@ -50,7 +40,7 @@ export function BugReportForm({
         />
       </div>
       {state.message ? <div className="notice">{state.message}</div> : null}
-      <SubmitButton />
+      <SubmitButton label="Send bug report" pendingLabel="Sending..." />
     </form>
   );
 }

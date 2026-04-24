@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { signOutAction } from "@/app/actions";
 import { AppNav } from "@/components/app-nav";
+import { SubmitButton } from "@/components/submit-button";
 
 export function AppShell({
   children,
@@ -19,7 +20,7 @@ export function AppShell({
     <div className="app-shell">
       <header className="app-shell__header">
         <div className="brand-lockup">
-          <Link href="/" className="brand-mark">
+          <Link href="/" className="brand-mark" data-loading-label="Opening home">
             <span className="brand-mark__dot" aria-hidden="true" />
             <span className="brand-mark__text">SamyakLabs.AI</span>
           </Link>
@@ -36,9 +37,11 @@ export function AppShell({
         <div className="app-shell__actions">
           {mode === "supabase" ? (
             <form action={signOutAction} className="app-shell__signout">
-              <button className="button-ghost" type="submit">
-                Logout
-              </button>
+              <SubmitButton
+                className="button-ghost"
+                label="Logout"
+                pendingLabel="Logging out..."
+              />
             </form>
           ) : (
             <Link href="/" className="button-ghost">

@@ -55,8 +55,7 @@ export default async function DashboardPage() {
   const progressLabel = `${snapshot.completedCount}/${snapshot.totalDays}`;
   const completedCaption =
     snapshot.completedCount === 1 ? "day completed" : "days completed";
-  const streakCaption =
-    snapshot.currentStreak === 1 ? "day in a row" : "days in a row";
+  const consistencyCaption = "completed without skipping";
 
   return (
     <div className="stack">
@@ -66,10 +65,15 @@ export default async function DashboardPage() {
             <Link
               href={`/mission/${snapshot.todayMission.id}`}
               className="button"
+              data-loading-label="Opening today's mission"
             >
               Open today&apos;s mission
             </Link>
-            <Link href="/progress" className="button-secondary">
+            <Link
+              href="/progress"
+              className="button-secondary"
+              data-loading-label="Opening progress"
+            >
               See full progress
             </Link>
           </div>
@@ -87,9 +91,9 @@ export default async function DashboardPage() {
             <p className="muted">started but not finished</p>
           </div>
           <div className="stat-card">
-            <span className="stat-card__label">Streak</span>
+            <span className="stat-card__label">Days in a row</span>
             <strong>{snapshot.currentStreak}</strong>
-            <p className="muted">{streakCaption}</p>
+            <p className="muted">{consistencyCaption}</p>
           </div>
         </div>
       </section>
@@ -97,40 +101,44 @@ export default async function DashboardPage() {
       <SectionCard title={snapshot.hasFullAccess ? "All 90 days" : "Current plan"}>
         <div className="task-list">
           {currentPlan.map(({ mission, metaText, isLocked, scheduledFor }) => (
-            <div
-              key={mission.id}
-              className={`task-row${isLocked ? " task-row--locked" : ""}`}
-            >
-              <div className="task-row__meta">
-                {isLocked ? (
+            isLocked ? (
+              <div
+                key={mission.id}
+                className="task-row task-row--locked"
+              >
+                <div className="task-row__meta">
                   <strong className="task-row__title-text">
                     Day {mission.dayNumber}: {mission.title}
                   </strong>
-                ) : (
-                  <Link
-                    href={`/mission/${mission.id}`}
-                    className="task-row__title-link"
-                  >
-                    Day {mission.dayNumber}: {mission.title}
-                  </Link>
-                )}
-                <p className="task-row__schedule">{scheduledFor}</p>
-                <p className="muted">{metaText}</p>
-                {isLocked ? (
+                  <p className="task-row__schedule">{scheduledFor}</p>
+                  <p className="muted">{metaText}</p>
                   <p className="muted">Available on Day {mission.dayNumber}.</p>
-                ) : null}
-              </div>
-              <div className="pill-row">
-                <StatusBadge taskType={mission.taskType} />
-                {isLocked ? (
+                </div>
+                <div className="pill-row">
+                  <StatusBadge taskType={mission.taskType} />
                   <span className="button-ghost button-ghost--disabled">Locked</span>
-                ) : (
-                  <Link href={`/mission/${mission.id}`} className="button-ghost">
-                    Open
-                  </Link>
-                )}
+                </div>
               </div>
-            </div>
+            ) : (
+              <Link
+                key={mission.id}
+                href={`/mission/${mission.id}`}
+                className="task-row task-row--interactive"
+                data-loading-label={`Opening Day ${mission.dayNumber}`}
+              >
+                <div className="task-row__meta">
+                  <strong className="task-row__title-text">
+                    Day {mission.dayNumber}: {mission.title}
+                  </strong>
+                  <p className="task-row__schedule">{scheduledFor}</p>
+                  <p className="muted">{metaText}</p>
+                </div>
+                <div className="pill-row">
+                  <StatusBadge taskType={mission.taskType} />
+                  <span className="button-ghost">Open</span>
+                </div>
+              </Link>
+            )
           ))}
         </div>
       </SectionCard>

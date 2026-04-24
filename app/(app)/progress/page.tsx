@@ -31,7 +31,7 @@ export default async function ProgressPage() {
         <div className="progress-hero">
           <div className="hero-copy">
             <p className="eyebrow">Progress snapshot</p>
-            <h1 style={{ fontSize: "3.6rem" }}>Keep the streak visible.</h1>
+            <h1 style={{ fontSize: "3.6rem" }}>Keep your daily progress visible.</h1>
             <p>
               A clean progress view makes it easier to keep going. Finish one task,
               see the movement, and come back tomorrow.
@@ -72,9 +72,9 @@ export default async function ProgressPage() {
             <p className="muted">missions you started</p>
           </div>
           <div className="stat-card">
-            <span className="eyebrow">Current streak</span>
+            <span className="eyebrow">Days in a row</span>
             <strong>{data.snapshot.currentStreak}</strong>
-            <p className="muted">days in a row</p>
+            <p className="muted">completed without skipping</p>
           </div>
         </div>
       </SectionCard>

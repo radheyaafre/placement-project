@@ -1,5 +1,6 @@
 import { saveSettingsAction, signOutAction } from "@/app/actions";
 import { SectionCard } from "@/components/section-card";
+import { SubmitButton } from "@/components/submit-button";
 import { getSettingsSnapshot } from "@/lib/data";
 import { formatHour12, formatWeekday } from "@/lib/utils";
 
@@ -157,17 +158,17 @@ export default async function SettingsPage({
               </select>
             </div>
           </div>
-          <button className="button" type="submit">
-            Save settings
-          </button>
+          <SubmitButton label="Save settings" pendingLabel="Saving settings..." />
         </form>
       </SectionCard>
 
       {settings.mode === "supabase" ? (
         <form action={signOutAction}>
-          <button className="button-secondary" type="submit">
-            Sign out
-          </button>
+          <SubmitButton
+            className="button-secondary"
+            label="Sign out"
+            pendingLabel="Signing out..."
+          />
         </form>
       ) : null}
     </div>

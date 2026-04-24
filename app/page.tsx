@@ -27,7 +27,7 @@ export default async function HomePage() {
   return (
     <div className="marketing-shell">
       <header className="marketing-header">
-        <Link href="/" className="brand-mark">
+        <Link href="/" className="brand-mark" data-loading-label="Opening home">
           <span className="brand-mark__dot" aria-hidden="true" />
           <span className="brand-mark__text">SamyakLabs.AI</span>
         </Link>
@@ -52,10 +52,10 @@ export default async function HomePage() {
           </div>
         </div>
         <div className="hero-actions">
-          <Link href="/signup" className="button">
+          <Link href="/signup" className="button" data-loading-label="Opening signup">
             Get Started
           </Link>
-          <Link href="/login" className="button-ghost">
+          <Link href="/login" className="button-ghost" data-loading-label="Opening login">
             I already have an account
           </Link>
         </div>
@@ -75,10 +75,14 @@ export default async function HomePage() {
               ))}
             </div>
             <div className="hero-actions">
-              <Link href="/signup" className="button">
+              <Link href="/signup" className="button" data-loading-label="Opening signup">
                 Get Started
               </Link>
-              <Link href={dashboardHref} className="button-secondary">
+              <Link
+                href={dashboardHref}
+                className="button-secondary"
+                data-loading-label="Opening dashboard"
+              >
                 Open Dashboard
               </Link>
             </div>

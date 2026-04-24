@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
 import "@/app/globals.css";
+import { NavigationFeedback } from "@/components/navigation-feedback";
 
 export const metadata: Metadata = {
   title: "Placement Prep",
@@ -17,6 +18,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
+        <NavigationFeedback />
         <div className="root-shell">{children}</div>
       </body>
     </html>

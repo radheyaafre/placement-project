@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { previewImportAction } from "@/app/actions";
 import { SectionCard } from "@/components/section-card";
+import { SubmitButton } from "@/components/submit-button";
 import { getAdminContentSnapshot } from "@/lib/data";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
@@ -54,9 +55,10 @@ export default async function AdminContentPage({
                 defaultValue={snapshot.sampleCsv}
               />
             </div>
-            <button className="button" type="submit">
-              Preview import
-            </button>
+            <SubmitButton
+              label="Preview import"
+              pendingLabel="Previewing import..."
+            />
           </form>
         </div>
       </SectionCard>

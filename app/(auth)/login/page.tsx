@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 import { signInAction } from "@/app/actions";
 import { AuthTabs } from "@/components/auth-tabs";
+import { SubmitButton } from "@/components/submit-button";
 import { getViewerContext } from "@/lib/auth";
 import { isSupabaseConfigured } from "@/lib/env";
 import { buildRedirect, getSafeNextPath } from "@/lib/utils";
@@ -59,9 +60,10 @@ export default async function LoginPage({
             <label htmlFor="password">Password</label>
             <input className="input" id="password" name="password" type="password" placeholder="••••••••" />
           </div>
-          <button className="button" type="submit">
-            {isSupabaseConfigured() ? "Sign in" : "Continue to demo"}
-          </button>
+          <SubmitButton
+            label={isSupabaseConfigured() ? "Sign in" : "Continue to demo"}
+            pendingLabel={isSupabaseConfigured() ? "Signing in..." : "Opening demo..."}
+          />
         </form>
         <p className="muted">
           Forgot your password? <Link href="/forgot-password">Reset it</Link>

@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { requestPasswordResetAction } from "@/app/actions";
+import { SubmitButton } from "@/components/submit-button";
 import { isSupabaseConfigured } from "@/lib/env";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
@@ -37,9 +38,10 @@ export default async function ForgotPasswordPage({
               placeholder="student@example.com"
             />
           </div>
-          <button className="button" type="submit">
-            Send reset email
-          </button>
+          <SubmitButton
+            label="Send reset email"
+            pendingLabel="Sending reset email..."
+          />
         </form>
         <p className="muted">
           Need to sign in? <Link href="/login">Back to login</Link>
