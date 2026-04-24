@@ -31,7 +31,7 @@ export default async function ProgressPage() {
         <div className="progress-hero">
           <div className="hero-copy">
             <p className="eyebrow">Progress snapshot</p>
-            <h1 style={{ fontSize: "3.6rem" }}>Keep your daily progress visible.</h1>
+            <h1 className="app-page-title">Keep your daily progress visible.</h1>
             <p>
               A clean progress view makes it easier to keep going. Finish one task,
               see the movement, and come back tomorrow.
@@ -84,7 +84,7 @@ export default async function ProgressPage() {
           {inProgress.length ? inProgress.map(({ mission, status, score }) => (
             <div key={mission.id} className="task-row">
               <div className="task-row__meta">
-                <strong>
+                <strong className="task-row__title-text">
                   Day {mission.dayNumber}: {mission.title}
                 </strong>
                 <p className="muted">
@@ -106,7 +106,7 @@ export default async function ProgressPage() {
           {completed.length ? completed.map(({ mission, status, score }) => (
             <div key={mission.id} className="task-row">
               <div className="task-row__meta">
-                <strong>
+                <strong className="task-row__title-text">
                   Day {mission.dayNumber}: {mission.title}
                 </strong>
                 <p className="muted">
