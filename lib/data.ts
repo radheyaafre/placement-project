@@ -248,6 +248,10 @@ export async function getDashboardSnapshot() {
     .eq("status", "active")
     .maybeSingle();
 
+  if (!planRow?.plan_template_id) {
+    return null;
+  }
+
   const startDate =
     planRow?.start_date || toDateOnly(new Date(), viewer.profile.timezone);
 
@@ -256,6 +260,10 @@ export async function getDashboardSnapshot() {
     .select("id, name, duration_days")
     .eq("id", planRow?.plan_template_id || "")
     .maybeSingle();
+
+  if (!planTemplate?.id) {
+    return null;
+  }
 
   const { data: dayRows } = await supabase
     .from("plan_days")
@@ -332,27 +340,7 @@ export async function getDashboardSnapshot() {
   }, {});
 
   if (!missions.length) {
-    const demoState = await getDemoState({
-      blankProgress: true,
-      ownerUserId: viewer.userId
-    });
-
-    return buildDashboardSnapshot({
-      mode: "supabase",
-      profile: viewer.profile,
-      reminderSettings: {
-        emailEnabled: false,
-        weeklyReminderEnabled: false,
-        weeklyReminderDay: 0,
-        weeklyReminderHour: 19,
-        timezone: viewer.profile.timezone
-      },
-      planName: planTemplate?.name || "Placement Sprint",
-      totalDays: planTemplate?.duration_days || 90,
-      startDate,
-      missions: demoMissions,
-      progressByTaskId: buildDemoProgressMap(demoMissions, demoState)
-    });
+    return null;
   }
 
   const { data: reminderRow } = await supabase
@@ -404,15 +392,8 @@ export async function getMissionDetail(taskId: string): Promise<MissionDetail | 
   const usesDirectFlow = usesDirectCompleteFlow(mission.taskType);
   let responsesByQuestionId: Record<string, MissionQuestionResponse> = {};
 
-  if (snapshot.mode === "demo" || !progress?.progressId) {
-    const demoState = await getDemoState(
-      snapshot.mode === "supabase"
-        ? {
-            blankProgress: true,
-            ownerUserId: snapshot.profile.userId
-          }
-        : undefined
-    );
+  if (snapshot.mode === "demo") {
+    const demoState = await getDemoState();
     const savedResponses = demoState.responsesByTaskId?.[taskId] || {};
 
     responsesByQuestionId = mission.questions.reduce<
@@ -432,7 +413,7 @@ export async function getMissionDetail(taskId: string): Promise<MissionDetail | 
 
       return acc;
     }, {});
-  } else if (isSupabaseConfigured()) {
+  } else if (progress?.progressId && isSupabaseConfigured()) {
     const supabase = await createSupabaseServerClient();
     const { data: attemptRows } = await supabase
       .from("question_attempts")

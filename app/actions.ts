@@ -468,7 +468,11 @@ export async function submitMissionAttemptAction(formData: FormData) {
   const detail = await getMissionDetail(taskId);
 
   if (!detail) {
-    redirect("/dashboard");
+    redirect(
+      buildRedirect("/dashboard", {
+        error: "This task is not available right now."
+      })
+    );
   }
 
   if (usesDirectCompleteFlow(detail.mission.taskType)) {
@@ -516,10 +520,15 @@ export async function submitMissionAttemptAction(formData: FormData) {
     );
   }
 
-  const useFallbackStorage =
-    !isSupabaseConfigured() ||
-    !detail.mission.planDayId ||
-    !looksLikeUuid(taskId);
+  if (isSupabaseConfigured() && (!detail.mission.planDayId || !looksLikeUuid(taskId))) {
+    redirect(
+      buildRedirect("/dashboard", {
+        error: "This live task configuration is invalid right now."
+      })
+    );
+  }
+
+  const useFallbackStorage = !isSupabaseConfigured();
 
   if (useFallbackStorage) {
     const viewer = isSupabaseConfigured()
@@ -649,7 +658,11 @@ export async function completeMissionAction(formData: FormData) {
   const detail = await getMissionDetail(taskId);
 
   if (!detail) {
-    redirect("/dashboard");
+    redirect(
+      buildRedirect("/dashboard", {
+        error: "This task is not available right now."
+      })
+    );
   }
 
   if (!detail.canMarkComplete) {
@@ -660,10 +673,15 @@ export async function completeMissionAction(formData: FormData) {
     );
   }
 
-  const useFallbackStorage =
-    !isSupabaseConfigured() ||
-    !detail.mission.planDayId ||
-    !looksLikeUuid(taskId);
+  if (isSupabaseConfigured() && (!detail.mission.planDayId || !looksLikeUuid(taskId))) {
+    redirect(
+      buildRedirect("/dashboard", {
+        error: "This live task configuration is invalid right now."
+      })
+    );
+  }
+
+  const useFallbackStorage = !isSupabaseConfigured();
 
   if (useFallbackStorage) {
     const viewer = isSupabaseConfigured()

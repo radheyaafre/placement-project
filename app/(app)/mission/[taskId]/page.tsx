@@ -1,4 +1,4 @@
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 
 import {
   completeMissionAction,
@@ -9,7 +9,7 @@ import { StatusBadge } from "@/components/status-badge";
 import { SubmitButton } from "@/components/submit-button";
 import { getMissionDetail } from "@/lib/data";
 import { usesDirectCompleteFlow } from "@/lib/plan";
-import { demoMissions } from "@/lib/sample-data";
+import { buildRedirect } from "@/lib/utils";
 
 type Params = Promise<{ taskId: string }>;
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
@@ -55,11 +55,11 @@ export default async function MissionPage({
   const detail = await getMissionDetail(taskId);
 
   if (!detail) {
-    if (demoMissions.some((mission) => mission.id === taskId)) {
-      redirect(`/preview/${taskId}`);
-    }
-
-    notFound();
+    redirect(
+      buildRedirect("/dashboard", {
+        error: "This mission is not available right now."
+      })
+    );
   }
 
   const error = typeof query.error === "string" ? query.error : "";

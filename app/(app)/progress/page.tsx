@@ -9,7 +9,28 @@ export default async function ProgressPage() {
   const data = await getProgressSnapshot();
 
   if (!data) {
-    return null;
+    return (
+      <div className="stack">
+        <SectionCard title="App unavailable" eyebrow="Live data required">
+          <p>
+            Progress is unavailable right now because the live placement program data
+            is not ready.
+          </p>
+          <p className="muted">
+            This production build does not fall back to sample tasks. Complete onboarding
+            if your account is new, or check the published Supabase plan content.
+          </p>
+          <div className="button-row">
+            <Link href="/dashboard" className="button-secondary">
+              Back to dashboard
+            </Link>
+            <Link href="/report-bug" className="button-ghost">
+              Report a bug
+            </Link>
+          </div>
+        </SectionCard>
+      </div>
+    );
   }
 
   const visibleMissionStates = data.snapshot.visibleMissionStates ?? [];

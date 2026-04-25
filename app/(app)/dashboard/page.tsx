@@ -7,6 +7,8 @@ import { deriveMissionStatus } from "@/lib/plan";
 import { formatPlanDate, parseLocalDate, shiftDays } from "@/lib/utils";
 import type { MissionStatus } from "@/types/domain";
 
+type SearchParams = Promise<Record<string, string | string[] | undefined>>;
+
 function getQueueState(status: MissionStatus) {
   switch (status) {
     case "completed":
@@ -21,11 +23,39 @@ function getQueueState(status: MissionStatus) {
   }
 }
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams
+}: {
+  searchParams: SearchParams;
+}) {
+  const params = await searchParams;
   const snapshot = await getDashboardSnapshot();
+  const error = typeof params.error === "string" ? params.error : "";
 
   if (!snapshot) {
-    return null;
+    return (
+      <div className="stack">
+        {error ? <div className="notice">{error}</div> : null}
+        <SectionCard title="App unavailable" eyebrow="Live data required">
+          <p>
+            The live placement program is not available right now. This production
+            build does not fall back to sample tasks, so students only see real data.
+          </p>
+          <p className="muted">
+            If you just created the account, complete onboarding first. If onboarding is
+            already done, the Supabase plan content likely needs attention.
+          </p>
+          <div className="button-row">
+            <Link href="/onboarding" className="button-secondary">
+              Open onboarding
+            </Link>
+            <Link href="/report-bug" className="button-ghost">
+              Report a bug
+            </Link>
+          </div>
+        </SectionCard>
+      </div>
+    );
   }
 
   const planStartDate = parseLocalDate(snapshot.startDate);
@@ -72,6 +102,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="stack">
+      {error ? <div className="notice">{error}</div> : null}
       <section className="hero-panel app-hero app-hero--dashboard dashboard-hero">
         <div className="dashboard-toolbar">
           <div className="hero-copy dashboard-hero__copy">
