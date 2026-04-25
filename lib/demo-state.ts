@@ -88,21 +88,6 @@ export async function getDemoState(options?: {
       };
     }
 
-    if (options?.blankProgress) {
-      return {
-        ...fallbackState,
-        profile: {
-          ...fallbackState.profile,
-          ...parsed.profile,
-          ...(options?.ownerUserId ? { userId: options.ownerUserId } : {})
-        },
-        reminderSettings: {
-          ...fallbackState.reminderSettings,
-          ...parsed.reminderSettings
-        }
-      };
-    }
-
     return {
       ...fallbackState,
       ...parsed,
