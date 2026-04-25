@@ -522,10 +522,17 @@ export async function submitMissionAttemptAction(formData: FormData) {
     !looksLikeUuid(taskId);
 
   if (useFallbackStorage) {
-    const current = await getDemoState();
     const viewer = isSupabaseConfigured()
       ? await getViewerContext()
       : null;
+    const current = await getDemoState(
+      viewer?.userId
+        ? {
+            blankProgress: true,
+            ownerUserId: viewer.userId
+          }
+        : undefined
+    );
 
     await setDemoState({
       ...current,
@@ -659,10 +666,17 @@ export async function completeMissionAction(formData: FormData) {
     !looksLikeUuid(taskId);
 
   if (useFallbackStorage) {
-    const current = await getDemoState();
     const viewer = isSupabaseConfigured()
       ? await getViewerContext()
       : null;
+    const current = await getDemoState(
+      viewer?.userId
+        ? {
+            blankProgress: true,
+            ownerUserId: viewer.userId
+          }
+        : undefined
+    );
 
     await setDemoState({
       ...current,
