@@ -36,7 +36,32 @@ function formatStudentPlan(user: {
 }
 
 export default async function AdminOverviewPage() {
-  const snapshot = await getAdminDashboardSnapshot();
+  let snapshot;
+
+  try {
+    snapshot = await getAdminDashboardSnapshot();
+  } catch (error) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Unable to load the admin dashboard right now.";
+
+    return (
+      <SectionCard title="Admin dashboard unavailable" eyebrow="Runtime issue">
+        <p>
+          The admin dashboard could not load right now. The student app may still work,
+          but the cross-user reporting path failed on the server.
+        </p>
+        <div className="notice">
+          <strong>Server detail:</strong> {message}
+        </div>
+        <p className="muted">
+          Check the `SUPABASE_SERVICE_ROLE_KEY` production variable in the Vercel
+          project that serves this app, then redeploy.
+        </p>
+      </SectionCard>
+    );
+  }
 
   if (!snapshot.isAdmin) {
     return (

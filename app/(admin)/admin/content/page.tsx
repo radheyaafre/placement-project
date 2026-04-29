@@ -13,7 +13,28 @@ export default async function AdminContentPage({
   searchParams: SearchParams;
 }) {
   const params = await searchParams;
-  const snapshot = await getAdminContentSnapshot();
+  let snapshot;
+
+  try {
+    snapshot = await getAdminContentSnapshot();
+  } catch (error) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Unable to load admin content right now.";
+
+    return (
+      <SectionCard title="Admin content unavailable" eyebrow="Runtime issue">
+        <p>
+          The admin content tools could not load right now because the server-side
+          admin data path failed.
+        </p>
+        <div className="notice">
+          <strong>Server detail:</strong> {message}
+        </div>
+      </SectionCard>
+    );
+  }
   const error = typeof params.error === "string" ? params.error : "";
   const rows = typeof params.rows === "string" ? params.rows : "";
   const days = typeof params.days === "string" ? params.days : "";
