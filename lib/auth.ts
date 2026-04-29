@@ -8,6 +8,12 @@ import {
 } from "@/lib/sample-data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
+const ADMIN_EMAIL_ALLOWLIST = new Set(["radheya.afre@gmail.com"]);
+
+export function isAllowedAdminEmail(email?: string | null) {
+  return Boolean(email && ADMIN_EMAIL_ALLOWLIST.has(email.toLowerCase()));
+}
+
 function mergeDemoProfile(state: Awaited<ReturnType<typeof getDemoState>>): StudentProfile {
   return {
     ...demoProfile,
@@ -82,6 +88,9 @@ export async function getViewerContext(): Promise<ViewerContext> {
     .eq("user_id", user.id)
     .maybeSingle();
 
+  const isAdmin =
+    profileRow?.role === "admin" || isAllowedAdminEmail(user.email);
+
   const profile: StudentProfile = {
     userId: user.id,
     fullName:
@@ -92,7 +101,7 @@ export async function getViewerContext(): Promise<ViewerContext> {
     collegeName: profileRow?.college_name || "",
     targetRole: profileRow?.target_role || "Software Engineer",
     timezone: profileRow?.timezone || "Asia/Kolkata",
-    role: profileRow?.role === "admin" ? "admin" : "student",
+    role: isAdmin ? "admin" : "student",
     fullAccess
   };
 
@@ -101,7 +110,7 @@ export async function getViewerContext(): Promise<ViewerContext> {
     userId: user.id,
     displayName: profile.fullName,
     profile,
-    isAdmin: profile.role === "admin",
+    isAdmin,
     hasFullAccess: fullAccess
   };
 }

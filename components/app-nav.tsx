@@ -35,13 +35,22 @@ export function AppNav({ isAdmin }: { isAdmin: boolean }) {
         </Link>
       ))}
       {isAdmin ? (
-        <Link
-          href="/admin/content"
-          aria-current={isActivePath(pathname, "/admin") ? "page" : undefined}
-          data-loading-label="Opening admin content"
-        >
-          Admin Content
-        </Link>
+        <>
+          <Link
+            href="/admin"
+            aria-current={pathname === "/admin" ? "page" : undefined}
+            data-loading-label="Opening admin overview"
+          >
+            Admin
+          </Link>
+          <Link
+            href="/admin/content"
+            aria-current={isActivePath(pathname, "/admin/content") ? "page" : undefined}
+            data-loading-label="Opening admin content"
+          >
+            Admin Content
+          </Link>
+        </>
       ) : null}
     </nav>
   );

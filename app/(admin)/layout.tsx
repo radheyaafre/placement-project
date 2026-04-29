@@ -15,6 +15,10 @@ export default async function AdminLayout({
     redirect("/login");
   }
 
+  if (!viewer.isAdmin) {
+    redirect("/dashboard");
+  }
+
   return (
     <AppShell
       displayName={viewer.displayName}

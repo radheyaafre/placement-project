@@ -1,4 +1,5 @@
 import type {
+  AdminDashboardSnapshot,
   AdminContentSnapshot,
   DashboardSnapshot,
   Mission,
@@ -12,7 +13,7 @@ import type {
   TaskType
 } from "@/types/domain";
 
-import { getViewerContext, getDemoSettings } from "@/lib/auth";
+import { getViewerContext, getDemoSettings, isAllowedAdminEmail } from "@/lib/auth";
 import { getDemoState } from "@/lib/demo-state";
 import { isSupabaseConfigured } from "@/lib/env";
 import { parsePlanImport, SAMPLE_IMPORT_CSV } from "@/lib/admin-import";
@@ -30,8 +31,9 @@ import {
   demoPlan,
   demoProfile
 } from "@/lib/sample-data";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { asArray, splitParagraphs, toDateOnly } from "@/lib/utils";
+import { asArray, percent, splitParagraphs, toDateOnly } from "@/lib/utils";
 
 function mapSupabaseMission(dayRow: any): Mission | null {
   const taskRow = asArray(dayRow.tasks)[0];
@@ -203,6 +205,413 @@ function buildDashboardSnapshot(args: {
     progressByTaskId: effectiveProgressByTaskId,
     categoryBreakdown,
     visibleMissionStates
+  };
+}
+
+async function listAllAuthUsers(adminClient: ReturnType<typeof createSupabaseAdminClient>) {
+  const users: Array<{
+    id: string;
+    email: string;
+    createdAt: string | null;
+    lastSignInAt: string | null;
+  }> = [];
+
+  let page = 1;
+
+  while (true) {
+    const { data, error } = await adminClient.auth.admin.listUsers({
+      page,
+      perPage: 1000
+    });
+
+    if (error) {
+      throw error;
+    }
+
+    const batch = data?.users || [];
+
+    users.push(
+      ...batch.map((user) => ({
+        id: user.id,
+        email: user.email || "",
+        createdAt: user.created_at || null,
+        lastSignInAt: user.last_sign_in_at || null
+      }))
+    );
+
+    if (batch.length < 1000) {
+      break;
+    }
+
+    page += 1;
+  }
+
+  return users;
+}
+
+function getTaskRelation(row: any) {
+  return asArray(row?.tasks)[0] || null;
+}
+
+function getPlanDayRelation(row: any) {
+  return asArray(row?.plan_days)[0] || null;
+}
+
+function getPlanTemplateRelation(row: any) {
+  return asArray(row?.plan_templates)[0] || null;
+}
+
+function getLatestProgressActivity(row: any) {
+  return (
+    row.completed_at ||
+    row.solution_unlocked_at ||
+    row.first_attempt_at ||
+    row.updated_at ||
+    null
+  );
+}
+
+export async function getAdminDashboardSnapshot(): Promise<AdminDashboardSnapshot> {
+  const viewer = await getViewerContext();
+
+  if (!isSupabaseConfigured()) {
+    return {
+      mode: "demo",
+      isAdmin: true,
+      activePlanName: demoPlan.name,
+      activePlanDurationDays: demoPlan.totalDays,
+      totalStudents: 1,
+      onboardedStudents: 1,
+      notStartedStudents: 0,
+      activeTodayCount: 0,
+      completedTodayCount: 0,
+      averageCompletionPercent: 0,
+      needsAttentionCount: 0,
+      recentActivity: [],
+      taskCompletionMix: ([
+        "aptitude",
+        "dsa",
+        "sql",
+        "hr",
+        "revision"
+      ] as TaskType[]).map((taskType) => ({
+        taskType,
+        completed: 0
+      })),
+      userOverview: [
+        {
+          userId: demoProfile.userId,
+          fullName: demoProfile.fullName,
+          email: "demo@samyaklabs.ai",
+          collegeName: demoProfile.collegeName,
+          targetRole: demoProfile.targetRole,
+          timezone: demoProfile.timezone,
+          hasActivePlan: true,
+          startDate: toDateOnly(new Date(), demoProfile.timezone),
+          currentDay: 1,
+          totalDays: demoPlan.totalDays,
+          completedCount: 0,
+          inProgressCount: 0,
+          completionPercent: 0,
+          lastActivityAt: null,
+          lastSignInAt: null,
+          needsAttention: false
+        }
+      ]
+    };
+  }
+
+  if (!viewer.isAdmin) {
+    return {
+      mode: "supabase",
+      isAdmin: false,
+      activePlanName: "Restricted",
+      activePlanDurationDays: 90,
+      totalStudents: 0,
+      onboardedStudents: 0,
+      notStartedStudents: 0,
+      activeTodayCount: 0,
+      completedTodayCount: 0,
+      averageCompletionPercent: 0,
+      needsAttentionCount: 0,
+      recentActivity: [],
+      taskCompletionMix: ([
+        "aptitude",
+        "dsa",
+        "sql",
+        "hr",
+        "revision"
+      ] as TaskType[]).map((taskType) => ({
+        taskType,
+        completed: 0
+      })),
+      userOverview: []
+    };
+  }
+
+  const adminClient = createSupabaseAdminClient();
+  const [authUsers, activePlanResult, profilesResult, activePlansResult, progressResult] =
+    await Promise.all([
+      listAllAuthUsers(adminClient),
+      adminClient
+        .from("plan_templates")
+        .select("name, duration_days")
+        .eq("is_active", true)
+        .maybeSingle(),
+      adminClient
+        .from("profiles")
+        .select("user_id, full_name, college_name, target_role, timezone, role"),
+      adminClient
+        .from("student_plans")
+        .select(
+          "user_id, start_date, status, target_minutes_per_day, created_at, plan_templates(name, duration_days)"
+        )
+        .eq("status", "active"),
+      adminClient
+        .from("user_task_progress")
+        .select(
+          "id, user_id, status, completed_at, first_attempt_at, solution_unlocked_at, updated_at, tasks(title, task_type), plan_days(day_number)"
+        )
+    ]);
+
+  if (
+    activePlanResult.error ||
+    profilesResult.error ||
+    activePlansResult.error ||
+    progressResult.error
+  ) {
+    throw new Error(
+      activePlanResult.error?.message ||
+        profilesResult.error?.message ||
+        activePlansResult.error?.message ||
+        progressResult.error?.message ||
+        "Unable to load admin dashboard data."
+    );
+  }
+
+  const todayKey = toDateOnly(new Date(), "Asia/Kolkata");
+  const adminUserIds = new Set<string>();
+  const profileByUserId = new Map(
+    (profilesResult.data || []).map((row: any) => [row.user_id, row])
+  );
+
+  for (const authUser of authUsers) {
+    if (isAllowedAdminEmail(authUser.email)) {
+      adminUserIds.add(authUser.id);
+    }
+  }
+
+  for (const profileRow of profilesResult.data || []) {
+    if (profileRow.role === "admin") {
+      adminUserIds.add(profileRow.user_id);
+    }
+  }
+
+  const planByUserId = new Map(
+    (activePlansResult.data || []).map((row: any) => {
+      const planTemplate = getPlanTemplateRelation(row);
+
+      return [
+        row.user_id,
+        {
+          startDate: row.start_date as string,
+          durationDays: planTemplate?.duration_days || activePlanResult.data?.duration_days || 90
+        }
+      ];
+    })
+  );
+
+  const progressByUserId = new Map<
+    string,
+    {
+      completedCount: number;
+      inProgressCount: number;
+      lastActivityAt: string | null;
+    }
+  >();
+  const activeTodayUsers = new Set<string>();
+  let completedTodayCount = 0;
+  const taskCompletionCounts = new Map<TaskType, number>();
+  const recentActivityRaw: Array<{
+    id: string;
+    userId: string;
+    occurredAt: string;
+    status: "completed" | "started";
+    taskTitle: string;
+    taskType: TaskType | null;
+    dayNumber: number | null;
+  }> = [];
+
+  for (const row of progressResult.data || []) {
+    if (adminUserIds.has(row.user_id)) {
+      continue;
+    }
+
+    const summary = progressByUserId.get(row.user_id) || {
+      completedCount: 0,
+      inProgressCount: 0,
+      lastActivityAt: null
+    };
+
+    if (row.status === "completed") {
+      summary.completedCount += 1;
+    } else if (row.status === "attempted" || row.status === "solution_unlocked") {
+      summary.inProgressCount += 1;
+    }
+
+    const activityAt = getLatestProgressActivity(row);
+
+    if (activityAt) {
+      if (!summary.lastActivityAt || activityAt > summary.lastActivityAt) {
+        summary.lastActivityAt = activityAt;
+      }
+
+      if (toDateOnly(new Date(activityAt), "Asia/Kolkata") === todayKey) {
+        activeTodayUsers.add(row.user_id);
+      }
+    }
+
+    if (
+      row.completed_at &&
+      toDateOnly(new Date(row.completed_at), "Asia/Kolkata") === todayKey
+    ) {
+      completedTodayCount += 1;
+    }
+
+    progressByUserId.set(row.user_id, summary);
+
+    const taskRow = getTaskRelation(row);
+    const dayRow = getPlanDayRelation(row);
+
+    if (row.status === "completed" && taskRow?.task_type) {
+      const taskType = taskRow.task_type as TaskType;
+      taskCompletionCounts.set(
+        taskType,
+        (taskCompletionCounts.get(taskType) || 0) + 1
+      );
+    }
+
+    if (activityAt) {
+      recentActivityRaw.push({
+        id: row.id,
+        userId: row.user_id,
+        occurredAt: activityAt,
+        status: row.completed_at ? "completed" : "started",
+        taskTitle: taskRow?.title || "Mission activity",
+        taskType: (taskRow?.task_type as TaskType | undefined) || null,
+        dayNumber: dayRow?.day_number || null
+      });
+    }
+  }
+
+  const studentUsers = authUsers.filter((authUser) => !adminUserIds.has(authUser.id));
+  const userOverview = studentUsers
+    .map((authUser) => {
+      const profileRow = profileByUserId.get(authUser.id);
+      const planRow = planByUserId.get(authUser.id);
+      const progressRow = progressByUserId.get(authUser.id);
+      const currentDay = planRow
+        ? calculateCurrentDay(
+            planRow.startDate,
+            planRow.durationDays,
+            profileRow?.timezone || "Asia/Kolkata"
+          )
+        : null;
+      const availableDays = currentDay && planRow ? Math.min(currentDay, planRow.durationDays) : 0;
+      const completionPercent = availableDays
+        ? percent(progressRow?.completedCount || 0, availableDays)
+        : 0;
+      const lastActivityAt = progressRow?.lastActivityAt || null;
+      const attentionThreshold = Date.now() - 3 * 24 * 60 * 60 * 1000;
+      const needsAttention = planRow
+        ? Boolean(
+            (currentDay || 0) > 2 &&
+              (!lastActivityAt || new Date(lastActivityAt).getTime() < attentionThreshold)
+          )
+        : false;
+
+      return {
+        userId: authUser.id,
+        fullName:
+          profileRow?.full_name || authUser.email.split("@")[0] || "Student",
+        email: authUser.email,
+        collegeName: profileRow?.college_name || "",
+        targetRole: profileRow?.target_role || "Software Engineer",
+        timezone: profileRow?.timezone || "Asia/Kolkata",
+        hasActivePlan: Boolean(planRow),
+        startDate: planRow?.startDate || null,
+        currentDay,
+        totalDays: planRow?.durationDays || null,
+        completedCount: progressRow?.completedCount || 0,
+        inProgressCount: progressRow?.inProgressCount || 0,
+        completionPercent,
+        lastActivityAt,
+        lastSignInAt: authUser.lastSignInAt,
+        needsAttention
+      };
+    })
+    .sort((left, right) => {
+      if (left.needsAttention !== right.needsAttention) {
+        return left.needsAttention ? -1 : 1;
+      }
+
+      const leftStamp = left.lastActivityAt || left.lastSignInAt || "";
+      const rightStamp = right.lastActivityAt || right.lastSignInAt || "";
+
+      return rightStamp.localeCompare(leftStamp);
+    });
+
+  const recentActivity = recentActivityRaw
+    .sort((left, right) => right.occurredAt.localeCompare(left.occurredAt))
+    .slice(0, 12)
+    .map((activity) => {
+      const user = userOverview.find((row) => row.userId === activity.userId);
+
+      return {
+        id: activity.id,
+        userId: activity.userId,
+        fullName: user?.fullName || "Student",
+        email: user?.email || "",
+        status: activity.status,
+        taskTitle: activity.taskTitle,
+        taskType: activity.taskType,
+        dayNumber: activity.dayNumber,
+        occurredAt: activity.occurredAt
+      };
+    });
+
+  const onboardedUsers = userOverview.filter((user) => user.hasActivePlan);
+  const averageCompletionPercent = onboardedUsers.length
+    ? Math.round(
+        onboardedUsers.reduce((sum, user) => sum + user.completionPercent, 0) /
+          onboardedUsers.length
+      )
+    : 0;
+
+  return {
+    mode: "supabase",
+    isAdmin: true,
+    activePlanName: activePlanResult.data?.name || "No active plan yet",
+    activePlanDurationDays: activePlanResult.data?.duration_days || 90,
+    totalStudents: userOverview.length,
+    onboardedStudents: onboardedUsers.length,
+    notStartedStudents: userOverview.filter((user) => !user.hasActivePlan).length,
+    activeTodayCount: activeTodayUsers.size,
+    completedTodayCount,
+    averageCompletionPercent,
+    needsAttentionCount: userOverview.filter((user) => user.needsAttention).length,
+    recentActivity,
+    taskCompletionMix: ([
+      "aptitude",
+      "dsa",
+      "sql",
+      "hr",
+      "revision"
+    ] as TaskType[]).map((taskType) => ({
+      taskType,
+      completed: taskCompletionCounts.get(taskType) || 0
+    })),
+    userOverview
   };
 }
 
@@ -535,7 +944,18 @@ export async function getAdminContentSnapshot(): Promise<AdminContentSnapshot> {
     };
   }
 
-  const supabase = await createSupabaseServerClient();
+  if (!viewer.isAdmin) {
+    return {
+      mode: "supabase",
+      isAdmin: false,
+      activePlanName: "Restricted",
+      durationDays: 90,
+      publishedDays: 0,
+      sampleCsv: SAMPLE_IMPORT_CSV
+    };
+  }
+
+  const supabase = createSupabaseAdminClient();
   const { data: activePlan } = await supabase
     .from("plan_templates")
     .select("id, name, duration_days")

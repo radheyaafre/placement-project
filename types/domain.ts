@@ -154,6 +154,57 @@ export interface AdminContentSnapshot {
   sampleCsv: string;
 }
 
+export interface AdminUserOverview {
+  userId: string;
+  fullName: string;
+  email: string;
+  collegeName: string;
+  targetRole: string;
+  timezone: string;
+  hasActivePlan: boolean;
+  startDate: string | null;
+  currentDay: number | null;
+  totalDays: number | null;
+  completedCount: number;
+  inProgressCount: number;
+  completionPercent: number;
+  lastActivityAt: string | null;
+  lastSignInAt: string | null;
+  needsAttention: boolean;
+}
+
+export interface AdminRecentActivity {
+  id: string;
+  userId: string;
+  fullName: string;
+  email: string;
+  status: "completed" | "started";
+  taskTitle: string;
+  taskType: TaskType | null;
+  dayNumber: number | null;
+  occurredAt: string;
+}
+
+export interface AdminDashboardSnapshot {
+  mode: UserMode;
+  isAdmin: boolean;
+  activePlanName: string;
+  activePlanDurationDays: number;
+  totalStudents: number;
+  onboardedStudents: number;
+  notStartedStudents: number;
+  activeTodayCount: number;
+  completedTodayCount: number;
+  averageCompletionPercent: number;
+  needsAttentionCount: number;
+  recentActivity: AdminRecentActivity[];
+  taskCompletionMix: Array<{
+    taskType: TaskType;
+    completed: number;
+  }>;
+  userOverview: AdminUserOverview[];
+}
+
 export interface DemoState {
   startDate: string;
   profile: Partial<StudentProfile>;
