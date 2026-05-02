@@ -2124,6 +2124,88 @@ button {
   box-shadow: var(--shadow);
 }
 
+.app-tab-loading {
+  min-height: 48vh;
+  display: grid;
+  place-items: center;
+}
+
+.app-tab-loading__card {
+  width: min(640px, 100%);
+  display: grid;
+  gap: 16px;
+  padding: 24px;
+  border-radius: var(--radius-xl);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  background:
+    linear-gradient(160deg, rgba(12, 20, 33, 0.98), rgba(8, 16, 28, 0.92));
+  box-shadow: var(--shadow);
+}
+
+.app-tab-loading__card h2 {
+  font-size: clamp(1.4rem, 3vw, 1.9rem);
+}
+
+.app-tab-loading__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: #ffd49a;
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.app-tab-loading__skeletons {
+  display: grid;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.app-tab-loading__skeleton-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.app-tab-loading__skeleton {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.app-tab-loading__skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.12) 40%,
+    transparent 75%
+  );
+  transform: translateX(-100%);
+  animation: tabSkeletonShimmer 1.2s ease-in-out infinite;
+}
+
+.app-tab-loading__skeleton--wide {
+  height: 20px;
+  width: min(280px, 70%);
+}
+
+.app-tab-loading__skeleton--medium {
+  height: 14px;
+  width: min(420px, 92%);
+}
+
+.app-tab-loading__skeleton--tile {
+  min-height: 104px;
+}
+
+.app-tab-loading__skeleton--row {
+  min-height: 78px;
+}
+
 @keyframes spin {
   to {
     transform: rotate(360deg);
@@ -2140,6 +2222,12 @@ button {
   50% {
     transform: scaleX(1);
     opacity: 1;
+  }
+}
+
+@keyframes tabSkeletonShimmer {
+  to {
+    transform: translateX(100%);
   }
 }
 
@@ -2163,6 +2251,10 @@ button {
 
   .hero-metrics,
   .steps-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .app-tab-loading__skeleton-grid {
     grid-template-columns: 1fr;
   }
 

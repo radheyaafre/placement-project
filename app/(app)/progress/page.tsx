@@ -85,11 +85,10 @@ export default async function ProgressPage() {
       <section className="hero-panel app-hero app-hero--progress">
         <div className="progress-hero">
           <div className="hero-copy">
-            <p className="eyebrow">Progress snapshot</p>
-            <h1 className="app-page-title">Keep your daily progress visible.</h1>
+            <p className="eyebrow">Progress</p>
+            <h1 className="app-page-title">Your Progress</h1>
             <p>
-              Track progress against the days that are already due, then let the
-              future days unlock one by one.
+              Completed and pending days from your 90-day plan.
             </p>
           </div>
           <div className="progress-band">

@@ -361,10 +361,6 @@ export default async function MissionPage({
               <span className="muted">Current status</span>
               <StatusBadge status={detail.status} />
             </div>
-            <div className="topline">
-              <span className="muted">Days in a row</span>
-              <strong>{detail.snapshot.currentStreak}</strong>
-            </div>
           </div>
         </SectionCard>
       </aside>

@@ -39,14 +39,8 @@ export function NavigationFeedback() {
       return;
     }
 
-    const timeout = window.setTimeout(() => {
-      setPending(false);
-    }, 520);
-
-    return () => {
-      window.clearTimeout(timeout);
-    };
-  }, [pathname, pending]);
+    setPending(false);
+  }, [pending, pathname]);
 
   useEffect(() => {
     function handleClick(event: MouseEvent) {

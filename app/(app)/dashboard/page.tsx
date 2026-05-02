@@ -117,7 +117,7 @@ export default async function DashboardPage({
   const releasedDayCount = snapshot.completedCount + snapshot.pendingCount;
   const progressLabel = `${snapshot.completedCount}/${releasedDayCount}`;
   const pendingLabel = `${snapshot.pendingCount}/${releasedDayCount}`;
-  const queueTitle = snapshot.hasFullAccess ? "Full mission queue" : "This week's queue";
+  const queueTitle = snapshot.hasFullAccess ? "Full mission queue" : "This week's Tasks";
   const queueEyebrow = snapshot.hasFullAccess
     ? "Tester access"
     : `Day ${snapshot.currentDay} of ${snapshot.totalDays}`;
@@ -133,8 +133,8 @@ export default async function DashboardPage({
       <section className="hero-panel app-hero app-hero--dashboard dashboard-hero">
         <div className="dashboard-toolbar">
           <div className="hero-copy dashboard-hero__copy">
-            <p className="eyebrow">Mission queue</p>
-            <h1 className="dashboard-hero__title">Keep the next step obvious.</h1>
+            <p className="eyebrow">Placement dashboard</p>
+            <h1 className="dashboard-hero__title">Today's task and pending work.</h1>
             <p className="dashboard-hero__meta">
               Open today's task, finish it, and let the rest of the plan unlock
               one day at a time.
