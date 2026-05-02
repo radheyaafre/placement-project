@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 
 import { AppShell } from "@/components/app-shell";
 import { getViewerContext } from "@/lib/auth";
-import { getDashboardSnapshot } from "@/lib/data";
+import { getDashboardSnapshot, getViewerStudentPlanState } from "@/lib/data";
 import { formatPlanDate, parseLocalDate, shiftDays } from "@/lib/utils";
 
 export default async function StudentAppLayout({
@@ -13,10 +13,17 @@ export default async function StudentAppLayout({
 }) {
   const viewer = await getViewerContext();
   const snapshot = await getDashboardSnapshot();
+  const planState = await getViewerStudentPlanState();
 
   if (viewer.mode === "supabase" && !viewer.userId) {
     redirect("/login");
   }
+
+  const setupRequired =
+    viewer.mode === "supabase" &&
+    Boolean(viewer.userId) &&
+    !snapshot &&
+    planState === "missing";
 
   const programMeta = snapshot
     ? {
@@ -34,6 +41,7 @@ export default async function StudentAppLayout({
       isAdmin={viewer.isAdmin}
       mode={viewer.mode}
       programMeta={programMeta}
+      setupRequired={setupRequired}
     >
       {children}
     </AppShell>

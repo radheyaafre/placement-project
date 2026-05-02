@@ -11,16 +11,26 @@ function isActivePath(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export function AppNav({ isAdmin }: { isAdmin: boolean }) {
+export function AppNav({
+  isAdmin,
+  setupRequired = false
+}: {
+  isAdmin: boolean;
+  setupRequired?: boolean;
+}) {
   const pathname = usePathname();
 
-  const items = [
-    { href: "/dashboard", label: "Dashboard" },
-    { href: "/progress", label: "Progress" },
-    { href: "/settings", label: "Settings" },
-    { href: "/onboarding", label: "Onboarding" },
-    { href: "/report-bug", label: "Report bug" }
-  ];
+  const items = setupRequired
+    ? [
+        { href: "/onboarding", label: "Onboarding" },
+        { href: "/report-bug", label: "Report bug" }
+      ]
+    : [
+        { href: "/dashboard", label: "Dashboard" },
+        { href: "/progress", label: "Progress" },
+        { href: "/settings", label: "Settings" },
+        { href: "/report-bug", label: "Report bug" }
+      ];
 
   return (
     <nav className="nav-list" aria-label="Primary">

@@ -1,8 +1,9 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 import { saveOnboardingAction } from "@/app/actions";
 import { SubmitButton } from "@/components/submit-button";
-import { getSettingsSnapshot } from "@/lib/data";
+import { getSettingsSnapshot, getViewerStudentPlanState } from "@/lib/data";
 import { buildRedirect } from "@/lib/utils";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
@@ -24,18 +25,26 @@ export default async function OnboardingPage({
     return null;
   }
 
+  if (settings.mode === "supabase") {
+    const planState = await getViewerStudentPlanState();
+
+    if (planState === "present") {
+      redirect("/settings");
+    }
+  }
+
   return (
     <div className="split-panel">
       <section className="section-card">
         <div className="section-card__header">
           <div>
-            <p className="eyebrow">Onboarding</p>
-            <h2>Set up the student journey</h2>
+            <p className="eyebrow">Required setup</p>
+            <h2>Complete this once to start Day 1</h2>
           </div>
         </div>
         <p className="muted">
-          This form captures the basics, starts the 90-day plan from today, and keeps
-          the weekly reminder on by default.
+          This is the first required step after login. Save these details once, start
+          your 90-day plan from today, and then the main dashboard becomes your home.
         </p>
         {error ? <div className="notice">{error}</div> : null}
         <form action={saveOnboardingAction} className="stack">
@@ -110,30 +119,30 @@ export default async function OnboardingPage({
       <section className="section-card">
         <div className="section-card__header">
           <div>
-            <p className="eyebrow">What unlocks after this</p>
-            <h2>Student-ready daily flow</h2>
+            <p className="eyebrow">What happens next</p>
+            <h2>After this, the dashboard takes over</h2>
           </div>
         </div>
         <div className="stack">
           <div className="callout">
-            <h3>1. Personalized start date</h3>
+            <h3>1. Your Day 1 gets fixed</h3>
             <p className="muted">
-              Day 1 begins when the onboarding form is saved, so each student follows
-              the same content at their own pace.
+              The program starts from the day you save this form, so your 90-day flow
+              tracks against your own join date.
             </p>
           </div>
           <div className="callout">
-            <h3>2. Daily mission feed</h3>
+            <h3>2. The next task becomes clear</h3>
             <p className="muted">
-              The dashboard highlights one mission per day with progress, streak, and
-              backlog visibility.
+              The dashboard opens your current task, upcoming unlocks, and pending
+              days without extra setup screens.
             </p>
           </div>
           <div className="callout">
-            <h3>3. Clear progress view</h3>
+            <h3>3. Settings stay separate</h3>
             <p className="muted">
-              Students can always see what is done, what is started, and what comes
-              next in the 90-day plan.
+              Later profile edits live in Settings, so students do not have to think
+              about onboarding again.
             </p>
           </div>
         </div>

@@ -93,7 +93,7 @@ export default async function HomePage({
               across aptitude, DSA, SQL, HR, and revision.
             </p>
             <p className="landing-hero__flow">
-              Login. Finish daily task. Take notes. Mark completed.
+              Login. Complete setup once. Finish daily task. Mark completed.
             </p>
             <div className="hero-actions">
               <Link href="/signup" className="button" data-loading-label="Opening signup">
@@ -133,14 +133,16 @@ export default async function HomePage({
                 <p className="landing-sidecard__section-title">How it works</p>
                 <ul className="landing-sidecard__list">
                   <li>
-                    Once you enroll, you get one simple task every day for 90 days
-                    across aptitude, DSA, SQL, HR, and more.
+                    After login, you complete one short setup form once so your
+                    90-day plan can begin from your own start date.
                   </li>
                   <li>
-                    Finish today's task, and the next day unlocks after that.
+                    Once setup is saved, the dashboard becomes your home and shows
+                    one clear task at a time across aptitude, DSA, SQL, HR, and more.
                   </li>
                   <li>
-                    Your daily progress stays visible, so small wins keep adding up.
+                    Finish today's task, and the next day unlocks after that while
+                    your progress stays visible.
                   </li>
                 </ul>
               </div>

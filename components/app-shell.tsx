@@ -10,7 +10,8 @@ export function AppShell({
   displayName,
   isAdmin,
   mode,
-  programMeta
+  programMeta,
+  setupRequired = false
 }: {
   children: ReactNode;
   displayName: string;
@@ -21,6 +22,7 @@ export function AppShell({
     endLabel: string;
     dayLabel: string;
   } | null;
+  setupRequired?: boolean;
 }) {
   return (
     <div className="app-shell">
@@ -36,7 +38,9 @@ export function AppShell({
               <p className="muted">
                 {mode === "demo"
                   ? "Problem-first demo mode."
-                  : `Logged in as ${displayName}`}
+                  : setupRequired
+                    ? "Complete setup once to unlock Day 1 and the main dashboard."
+                    : `Logged in as ${displayName}`}
               </p>
               {programMeta ? (
                 <div className="app-shell__program-meta">
@@ -72,7 +76,7 @@ export function AppShell({
         </div>
 
         <div className="app-shell__navrow">
-          <AppNav isAdmin={isAdmin} />
+          <AppNav isAdmin={isAdmin} setupRequired={setupRequired} />
         </div>
       </header>
 

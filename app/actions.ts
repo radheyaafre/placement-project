@@ -188,7 +188,7 @@ export async function signInAction(formData: FormData) {
   const nextPath = getSafeNextPath(readString(formData, "next"), "/dashboard");
 
   const supabase = await createSupabaseServerClient();
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
     redirect(
@@ -197,6 +197,19 @@ export async function signInAction(formData: FormData) {
         next: nextPath
       })
     );
+  }
+
+  if (data.user?.id) {
+    const { data: activePlan, error: planError } = await supabase
+      .from("student_plans")
+      .select("id")
+      .eq("user_id", data.user.id)
+      .eq("status", "active")
+      .maybeSingle();
+
+    if (!planError && !activePlan?.id) {
+      redirect("/onboarding");
+    }
   }
 
   redirect(nextPath);
