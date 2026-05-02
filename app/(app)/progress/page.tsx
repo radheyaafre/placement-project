@@ -40,6 +40,9 @@ export default async function ProgressPage() {
   const inProgress = visibleMissionStates.filter(
     ({ status }) => status === "attempted" || status === "solution_unlocked"
   );
+  const pending = availableMissionStates.filter(
+    ({ status }) => status === "available" || status === "missed"
+  );
   const completed = visibleMissionStates.filter(
     ({ status }) => status === "completed"
   );
@@ -119,6 +122,35 @@ export default async function ProgressPage() {
             <strong>{data.snapshot.currentStreak}</strong>
             <p className="muted">completed without skipping</p>
           </div>
+        </div>
+      </SectionCard>
+
+      <SectionCard title="Pending and missed" eyebrow="Catch up next">
+        <div className="task-list">
+          {pending.length ? pending.map(({ mission, status }) => (
+            <Link
+              key={mission.id}
+              href={`/mission/${mission.id}`}
+              className="task-row task-row--interactive"
+              data-loading-label={`Opening Day ${mission.dayNumber}`}
+            >
+              <div className="task-row__meta">
+                <strong className="task-row__title-text">
+                  Day {mission.dayNumber}: {mission.title}
+                </strong>
+                <p className="task-row__schedule">
+                  {formatPlanDate(shiftDays(planStartDate, mission.dayNumber - 1))}
+                </p>
+                <p className="muted">
+                  {formatTaskType(mission.taskType)} • {mission.topic}
+                </p>
+              </div>
+              <div className="pill-row">
+                <StatusBadge taskType={mission.taskType} />
+                <StatusBadge status={status} />
+              </div>
+            </Link>
+          )) : <p className="muted">No pending days right now.</p>}
         </div>
       </SectionCard>
 

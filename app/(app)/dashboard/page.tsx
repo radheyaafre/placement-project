@@ -13,6 +13,8 @@ function getQueueState(status: MissionStatus) {
   switch (status) {
     case "completed":
       return { label: "Done", tone: "done" };
+    case "missed":
+      return { label: "Pending", tone: "missed" };
     case "attempted":
     case "solution_unlocked":
       return { label: "Started", tone: "started" };
@@ -86,6 +88,16 @@ export default async function DashboardPage({
         scheduledFor
       };
     });
+  const missedEarlierMissions = snapshot.visibleMissionStates
+    .filter(
+      ({ mission, status }) =>
+        status === "missed" && mission.weekNumber < snapshot.currentWeek
+    )
+    .map(({ mission, status }) => ({
+      mission,
+      status,
+      scheduledFor: formatPlanDate(shiftDays(planStartDate, mission.dayNumber - 1))
+    }));
   const progressLabel = `${snapshot.completedCount}/${snapshot.totalDays}`;
   const completedCaption =
     snapshot.completedCount === 1 ? "day completed" : "days completed";
@@ -149,6 +161,42 @@ export default async function DashboardPage({
           </div>
         </div>
       </section>
+
+      {missedEarlierMissions.length ? (
+        <SectionCard
+          title="Pending from earlier days"
+          eyebrow={`${missedEarlierMissions.length} missed`}
+        >
+          <div className="task-list">
+            {missedEarlierMissions.map(({ mission, status, scheduledFor }) => {
+              const queueState = getQueueState(status);
+
+              return (
+                <Link
+                  key={mission.id}
+                  href={`/mission/${mission.id}`}
+                  className="task-row task-row--interactive"
+                  data-loading-label={`Opening Day ${mission.dayNumber}`}
+                >
+                  <div className="task-row__meta">
+                    <strong className="task-row__title-text">
+                      Day {mission.dayNumber}: {mission.title}
+                    </strong>
+                    <p className="task-row__schedule">{scheduledFor}</p>
+                    <p className="muted">{mission.estimatedMinutes} min</p>
+                  </div>
+                  <div className="pill-row">
+                    <StatusBadge taskType={mission.taskType} />
+                    <span className={`queue-status queue-status--${queueState.tone}`}>
+                      {queueState.label}
+                    </span>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </SectionCard>
+      ) : null}
 
       <SectionCard title={queueTitle} eyebrow={queueEyebrow} aside={queueAside}>
         <div className="task-list">
