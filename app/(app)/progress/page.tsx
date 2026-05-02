@@ -185,7 +185,7 @@ export default async function ProgressPage() {
             <Link
               key={mission.id}
               href={`/mission/${mission.id}`}
-              className="task-row task-row--interactive"
+              className="task-row task-row--interactive task-row--completed"
               data-loading-label={`Opening Day ${mission.dayNumber}`}
             >
               <div className="task-row__meta">
