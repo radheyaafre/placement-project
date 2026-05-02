@@ -118,7 +118,7 @@ export default async function HomePage({
             <h2 className="landing-sidecard__title">A free 90-day kickstart for placement prep.</h2>
             <div className="landing-sidecard__copy landing-sidecard__copy--story">
               <p className="landing-sidecard__lead">
-                Let&apos;s be real. Too many resources, too many tabs, and still too
+                Let's be real. Too many resources, too many tabs, and still too
                 much confusion. Add distractions and inconsistency, and it becomes
                 easy to lose track. Even 30 to 40 minutes of focused work every day
                 can make a real difference.
@@ -137,7 +137,7 @@ export default async function HomePage({
                     across aptitude, DSA, SQL, HR, and more.
                   </li>
                   <li>
-                    Finish today&apos;s task, and the next day unlocks after that.
+                    Finish today's task, and the next day unlocks after that.
                   </li>
                   <li>
                     Your daily progress stays visible, so small wins keep adding up.

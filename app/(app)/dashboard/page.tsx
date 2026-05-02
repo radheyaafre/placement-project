@@ -136,7 +136,7 @@ export default async function DashboardPage({
             <p className="eyebrow">Mission queue</p>
             <h1 className="dashboard-hero__title">Keep the next step obvious.</h1>
             <p className="dashboard-hero__meta">
-              Open today&apos;s task, finish it, and let the rest of the plan unlock
+              Open today's task, finish it, and let the rest of the plan unlock
               one day at a time.
             </p>
           </div>
@@ -146,7 +146,7 @@ export default async function DashboardPage({
               className="button"
               data-loading-label="Opening today's mission"
             >
-              Open today&apos;s mission
+              Open today's mission
             </Link>
             <Link
               href="/progress"
