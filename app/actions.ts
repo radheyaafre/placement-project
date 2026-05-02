@@ -199,20 +199,7 @@ export async function signInAction(formData: FormData) {
     );
   }
 
-  if (data.user?.id) {
-    const { data: activePlan, error: planError } = await supabase
-      .from("student_plans")
-      .select("id")
-      .eq("user_id", data.user.id)
-      .eq("status", "active")
-      .maybeSingle();
-
-    if (!planError && !activePlan?.id) {
-      redirect("/onboarding");
-    }
-  }
-
-  redirect(nextPath);
+  redirect(buildRedirect("/auth/post-login", { next: nextPath }));
 }
 
 export async function signUpAction(formData: FormData) {
