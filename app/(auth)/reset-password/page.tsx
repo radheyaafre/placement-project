@@ -18,6 +18,9 @@ export default function ResetPasswordPage() {
             ? "Open the link from the recovery email, then finish the password reset here."
             : "This flow needs Supabase auth to be configured."}
         </p>
+        <p className="muted">
+          If the link says it has expired, request a fresh reset email and use the newest one.
+        </p>
         <ResetPasswordForm />
         <p className="muted">
           Need a fresh recovery link? <Link href="/forgot-password">Request another one</Link>

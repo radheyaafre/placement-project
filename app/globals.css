@@ -197,6 +197,12 @@ button {
   gap: 20px;
 }
 
+.marketing-inline-notice {
+  display: grid;
+  gap: 14px;
+  padding: 18px 20px;
+}
+
 .marketing-header {
   border: 1px solid var(--line);
   background: rgba(17, 20, 26, 0.88);

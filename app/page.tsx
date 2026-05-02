@@ -1,10 +1,31 @@
 import Link from "next/link";
 
 import { getViewerContext } from "@/lib/auth";
+import { getAuthLinkErrorMessage } from "@/lib/auth-link-messages";
 import { buildRedirect } from "@/lib/utils";
 
-export default async function HomePage() {
+type SearchParams = Promise<Record<string, string | string[] | undefined>>;
+
+function readParam(
+  params: Record<string, string | string[] | undefined>,
+  key: string
+) {
+  const value = params[key];
+  return typeof value === "string" ? value : "";
+}
+
+export default async function HomePage({
+  searchParams
+}: {
+  searchParams: SearchParams;
+}) {
+  const params = await searchParams;
   const viewer = await getViewerContext();
+  const authLinkError = getAuthLinkErrorMessage({
+    error: readParam(params, "error"),
+    errorCode: readParam(params, "error_code"),
+    errorDescription: readParam(params, "error_description")
+  });
   const requiresLogin = viewer.mode === "supabase" && !viewer.userId;
   const dashboardHref = requiresLogin
     ? buildRedirect("/login", { next: "/dashboard" })
@@ -18,6 +39,24 @@ export default async function HomePage() {
 
   return (
     <div className="marketing-shell">
+      {authLinkError ? (
+        <div className="notice marketing-inline-notice">
+          <p style={{ margin: 0, fontWeight: 700 }}>That email link did not work.</p>
+          <p style={{ margin: "8px 0 0", color: "var(--muted)" }}>{authLinkError}</p>
+          <div className="hero-actions">
+            <Link
+              href="/forgot-password"
+              className="button-secondary"
+              data-loading-label="Opening forgot password"
+            >
+              Request new reset link
+            </Link>
+            <Link href="/login" className="button-ghost" data-loading-label="Opening login">
+              Back to login
+            </Link>
+          </div>
+        </div>
+      ) : null}
       <header className="marketing-header">
         <div className="brand-lockup">
           <Link href="/" className="brand-mark" data-loading-label="Opening home">
