@@ -8,6 +8,7 @@ import { deriveMissionStatus } from "@/lib/plan";
 import {
   buildRedirect,
   formatPlanDate,
+  formatTaskType,
   parseLocalDate,
   shiftDays
 } from "@/lib/utils";
@@ -77,33 +78,33 @@ export default async function DashboardPage({
   }
 
   const planStartDate = parseLocalDate(snapshot.startDate);
+  const todayMissionDate = formatPlanDate(
+    shiftDays(planStartDate, snapshot.todayMission.dayNumber - 1)
+  );
   const dashboardMissions = snapshot.hasFullAccess
     ? snapshot.missions
     : snapshot.missions.filter(
         (mission) => mission.weekNumber === snapshot.currentWeek
       );
-  const currentPlan = dashboardMissions
-    .map((mission) => {
-      const progress = snapshot.progressByTaskId[mission.id] || null;
-      const status = deriveMissionStatus(
-        mission,
-        snapshot.currentDay,
-        progress,
-        snapshot.hasFullAccess
-      );
-      const scheduledFor = formatPlanDate(
-        shiftDays(planStartDate, mission.dayNumber - 1)
-      );
-      const metaParts = [`${mission.estimatedMinutes} min`];
+  const currentPlan = dashboardMissions.map((mission) => {
+    const progress = snapshot.progressByTaskId[mission.id] || null;
+    const status = deriveMissionStatus(
+      mission,
+      snapshot.currentDay,
+      progress,
+      snapshot.hasFullAccess
+    );
+    const scheduledFor = formatPlanDate(
+      shiftDays(planStartDate, mission.dayNumber - 1)
+    );
 
-      return {
-        mission,
-        status,
-        isLocked: status === "locked",
-        metaText: metaParts.join(" | "),
-        scheduledFor
-      };
-    });
+    return {
+      mission,
+      status,
+      isLocked: status === "locked",
+      scheduledFor
+    };
+  });
   const missedEarlierMissions = snapshot.visibleMissionStates
     .filter(
       ({ mission, status }) =>
@@ -117,13 +118,15 @@ export default async function DashboardPage({
   const releasedDayCount = snapshot.completedCount + snapshot.pendingCount;
   const progressLabel = `${snapshot.completedCount}/${releasedDayCount}`;
   const pendingLabel = `${snapshot.pendingCount}/${releasedDayCount}`;
-  const queueTitle = snapshot.hasFullAccess ? "Full mission queue" : "This week's Tasks";
+  const queueTitle = snapshot.hasFullAccess ? "All tasks" : "This week's Tasks";
   const queueEyebrow = snapshot.hasFullAccess
     ? "Tester access"
-    : `Day ${snapshot.currentDay} of ${snapshot.totalDays}`;
+    : `Week ${snapshot.currentWeek}`;
   const queueAside = (
     <span className="pill">
-      {snapshot.hasFullAccess ? "All days unlocked" : `Week ${snapshot.currentWeek}`}
+      {snapshot.hasFullAccess
+        ? "All days unlocked"
+        : `Day ${snapshot.currentDay} of ${snapshot.totalDays}`}
     </span>
   );
 
@@ -134,27 +137,32 @@ export default async function DashboardPage({
         <div className="dashboard-toolbar">
           <div className="hero-copy dashboard-hero__copy">
             <p className="eyebrow">Placement dashboard</p>
-            <h1 className="dashboard-hero__title">Today's task and pending work.</h1>
+            <h1 className="dashboard-hero__title">Start with today's task.</h1>
             <p className="dashboard-hero__meta">
-              Open today's task, finish it, and let the rest of the plan unlock
-              one day at a time.
+              Day {snapshot.currentDay} is ready. Finish it, then come back tomorrow
+              for the next unlock.
             </p>
           </div>
-          <div className="button-row">
-            <Link
-              href={`/mission/${snapshot.todayMission.id}`}
-              className="button"
-              data-loading-label="Opening today's mission"
-            >
-              Open today's mission
-            </Link>
-            <Link
-              href="/progress"
-              className="button-secondary"
-              data-loading-label="Opening progress"
-            >
-              See full progress
-            </Link>
+
+          <div className="focus-strip">
+            <span className="eyebrow">Today</span>
+            <strong>
+              Day {snapshot.todayMission.dayNumber}: {snapshot.todayMission.title}
+            </strong>
+            <div className="focus-strip__meta">
+              <span>{todayMissionDate}</span>
+              <span>{formatTaskType(snapshot.todayMission.taskType)}</span>
+              <span>{snapshot.todayMission.estimatedMinutes} min</span>
+            </div>
+            <div className="button-row">
+              <Link
+                href={`/mission/${snapshot.todayMission.id}`}
+                className="button"
+                data-loading-label="Opening today's mission"
+              >
+                Open today's task
+              </Link>
+            </div>
           </div>
         </div>
 
@@ -174,8 +182,8 @@ export default async function DashboardPage({
 
       {missedEarlierMissions.length ? (
         <SectionCard
-          title="Pending from earlier days"
-          eyebrow={`${missedEarlierMissions.length} missed`}
+          title="Pending for you"
+          eyebrow={`${missedEarlierMissions.length} earlier day${missedEarlierMissions.length === 1 ? "" : "s"}`}
         >
           <div className="task-list">
             {missedEarlierMissions.map(({ mission, status, scheduledFor }) => {
@@ -193,7 +201,9 @@ export default async function DashboardPage({
                       Day {mission.dayNumber}: {mission.title}
                     </strong>
                     <p className="task-row__schedule">{scheduledFor}</p>
-                    <p className="muted">{mission.estimatedMinutes} min</p>
+                    <p className="muted">
+                      {formatTaskType(mission.taskType)} • {mission.estimatedMinutes} min
+                    </p>
                   </div>
                   <div className="pill-row">
                     <StatusBadge taskType={mission.taskType} />
@@ -210,8 +220,9 @@ export default async function DashboardPage({
 
       <SectionCard title={queueTitle} eyebrow={queueEyebrow} aside={queueAside}>
         <div className="task-list">
-          {currentPlan.map(({ mission, metaText, isLocked, scheduledFor, status }) => {
+          {currentPlan.map(({ mission, isLocked, scheduledFor, status }) => {
             const queueState = getQueueState(status);
+            const taskMeta = `${formatTaskType(mission.taskType)} • ${mission.estimatedMinutes} min`;
 
             return isLocked ? (
               <div
@@ -223,7 +234,7 @@ export default async function DashboardPage({
                     Day {mission.dayNumber}: {mission.title}
                   </strong>
                   <p className="task-row__schedule">{scheduledFor}</p>
-                  <p className="muted">{metaText}</p>
+                  <p className="muted">{taskMeta}</p>
                   <p className="muted">Available on Day {mission.dayNumber}.</p>
                 </div>
                 <div className="pill-row">
@@ -247,7 +258,7 @@ export default async function DashboardPage({
                     Day {mission.dayNumber}: {mission.title}
                   </strong>
                   <p className="task-row__schedule">{scheduledFor}</p>
-                  <p className="muted">{metaText}</p>
+                  <p className="muted">{taskMeta}</p>
                 </div>
                 <div className="pill-row">
                   <StatusBadge taskType={mission.taskType} />
