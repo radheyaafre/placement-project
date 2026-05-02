@@ -138,7 +138,7 @@ export default async function ProgressPage() {
         </div>
       </SectionCard>
 
-      <SectionCard title="Pending and missed" eyebrow="Catch up next">
+      <SectionCard title="Pending and missed" eyebrow="Pending for you">
         <div className="task-list">
           {pending.length ? pending.map(({ mission, status }) => (
             <Link
