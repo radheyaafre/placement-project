@@ -118,6 +118,17 @@ export default async function DashboardPage({
   const releasedDayCount = snapshot.completedCount + snapshot.pendingCount;
   const progressLabel = `${snapshot.completedCount}/${releasedDayCount}`;
   const pendingLabel = `${snapshot.pendingCount}/${releasedDayCount}`;
+  const todayProgress = snapshot.progressByTaskId[snapshot.todayMission.id] || null;
+  const backlogCount = Math.max(
+    snapshot.pendingCount - (todayProgress?.status === "completed" ? 0 : 1),
+    0
+  );
+  const pendingHelperText =
+    snapshot.pendingCount === 0
+      ? "nothing pending right now"
+      : backlogCount > 0
+        ? `${backlogCount} earlier pending day${backlogCount === 1 ? "" : "s"} still open`
+        : "today's task is the only pending day";
   const queueTitle = snapshot.hasFullAccess ? "All tasks" : "This week's Tasks";
   const queueEyebrow = snapshot.hasFullAccess
     ? "Tester access"
@@ -162,7 +173,22 @@ export default async function DashboardPage({
               >
                 Open today's task
               </Link>
+              {backlogCount > 0 ? (
+                <Link
+                  href="/progress"
+                  className="button-secondary"
+                  data-loading-label="Opening pending tasks"
+                >
+                  Open pending tasks
+                </Link>
+              ) : null}
             </div>
+            {backlogCount > 0 ? (
+              <p className="muted">
+                You still have {backlogCount} earlier pending day
+                {backlogCount === 1 ? "" : "s"}. They are still available in Progress.
+              </p>
+            ) : null}
           </div>
         </div>
 
@@ -175,7 +201,7 @@ export default async function DashboardPage({
           <div className="stat-card">
             <span className="stat-card__label">Pending</span>
             <strong>{pendingLabel}</strong>
-            <p className="muted">pending out of released days</p>
+            <p className="muted">{pendingHelperText}</p>
           </div>
         </div>
       </section>
