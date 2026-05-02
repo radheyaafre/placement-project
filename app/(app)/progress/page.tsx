@@ -55,6 +55,7 @@ export default async function ProgressPage() {
     data.snapshot.totalDays - availableMissionCount,
     0
   );
+  const pendingSoFarCount = data.snapshot.pendingCount;
   const planStartDate = parseLocalDate(data.snapshot.startDate);
   const overallCompletionSoFar = percent(
     completedSoFarCount,
@@ -106,21 +107,16 @@ export default async function ProgressPage() {
             You can see the pending and completed tasks below.
           </p>
         </div>
-        <div className="stat-grid">
+        <div className="stat-grid stat-grid--two">
           <div className="stat-card">
-            <span className="eyebrow">Overall completion</span>
-            <strong>{data.snapshot.completedCount}</strong>
-            <p className="muted">missions marked complete</p>
+            <span className="eyebrow">Progress</span>
+            <strong>{completedSoFarCount}/{availableMissionCount}</strong>
+            <p className="muted">completed out of released days</p>
           </div>
           <div className="stat-card">
-            <span className="eyebrow">In progress</span>
-            <strong>{data.snapshot.inProgressCount}</strong>
-            <p className="muted">missions you started</p>
-          </div>
-          <div className="stat-card">
-            <span className="eyebrow">Days in a row</span>
-            <strong>{data.snapshot.currentStreak}</strong>
-            <p className="muted">completed without skipping</p>
+            <span className="eyebrow">Pending</span>
+            <strong>{pendingSoFarCount}/{availableMissionCount}</strong>
+            <p className="muted">pending out of released days</p>
           </div>
         </div>
       </SectionCard>

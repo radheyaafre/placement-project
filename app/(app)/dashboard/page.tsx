@@ -98,10 +98,9 @@ export default async function DashboardPage({
       status,
       scheduledFor: formatPlanDate(shiftDays(planStartDate, mission.dayNumber - 1))
     }));
-  const progressLabel = `${snapshot.completedCount}/${snapshot.totalDays}`;
-  const completedCaption =
-    snapshot.completedCount === 1 ? "day completed" : "days completed";
-  const consistencyCaption = "completed without skipping";
+  const releasedDayCount = snapshot.completedCount + snapshot.pendingCount;
+  const progressLabel = `${snapshot.completedCount}/${releasedDayCount}`;
+  const pendingLabel = `${snapshot.pendingCount}/${releasedDayCount}`;
   const queueTitle = snapshot.hasFullAccess ? "Full mission queue" : "This week's queue";
   const queueEyebrow = snapshot.hasFullAccess
     ? "Tester access"
@@ -143,21 +142,16 @@ export default async function DashboardPage({
           </div>
         </div>
 
-        <div className="stat-grid dashboard-hero__stats">
+        <div className="stat-grid stat-grid--two dashboard-hero__stats">
           <div className="stat-card">
             <span className="stat-card__label">Progress</span>
             <strong>{progressLabel}</strong>
-            <p className="muted">{completedCaption}</p>
+            <p className="muted">completed out of released days</p>
           </div>
           <div className="stat-card">
-            <span className="stat-card__label">Started</span>
-            <strong>{snapshot.inProgressCount}</strong>
-            <p className="muted">started but not finished</p>
-          </div>
-          <div className="stat-card">
-            <span className="stat-card__label">Days in a row</span>
-            <strong>{snapshot.currentStreak}</strong>
-            <p className="muted">{consistencyCaption}</p>
+            <span className="stat-card__label">Pending</span>
+            <strong>{pendingLabel}</strong>
+            <p className="muted">pending out of released days</p>
           </div>
         </div>
       </section>
@@ -227,7 +221,9 @@ export default async function DashboardPage({
               <Link
                 key={mission.id}
                 href={`/mission/${mission.id}`}
-                className="task-row task-row--interactive"
+                className={`task-row task-row--interactive${
+                  status === "completed" ? " task-row--completed" : ""
+                }`}
                 data-loading-label={`Opening Day ${mission.dayNumber}`}
               >
                 <div className="task-row__meta">
