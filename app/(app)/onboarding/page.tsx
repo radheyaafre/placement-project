@@ -16,6 +16,9 @@ export default async function OnboardingPage({
   const settings = await getSettingsSnapshot();
   const error = typeof params.error === "string" ? params.error : "";
   const reportBugHref = buildRedirect("/report-bug", { next: "/onboarding" });
+  const reminderEnabled =
+    settings?.reminderSettings.emailEnabled &&
+    settings?.reminderSettings.weeklyReminderEnabled;
 
   if (!settings) {
     return null;
@@ -31,7 +34,8 @@ export default async function OnboardingPage({
           </div>
         </div>
         <p className="muted">
-          This form captures the basics and starts the 90-day plan from today.
+          This form captures the basics, starts the 90-day plan from today, and keeps
+          the weekly reminder on by default.
         </p>
         {error ? <div className="notice">{error}</div> : null}
         <form action={saveOnboardingAction} className="stack">
@@ -75,6 +79,24 @@ export default async function OnboardingPage({
               defaultValue={settings.profile.timezone}
             />
           </div>
+          <label className="toggle-field" htmlFor="weeklyReminderEnabled">
+            <input
+              className="toggle-field__input"
+              id="weeklyReminderEnabled"
+              name="weeklyReminderEnabled"
+              type="checkbox"
+              defaultChecked={reminderEnabled}
+            />
+            <span className="toggle-field__control" aria-hidden="true" />
+            <span className="toggle-field__copy">
+              <span className="toggle-field__title">Weekly email reminder</span>
+              <span className="toggle-field__hint">
+                Once every 7 days, we send a progress summary with your joined date,
+                completed count, pending count, and category-wise progress. You can
+                switch this off anytime in Settings.
+              </span>
+            </span>
+          </label>
           <SubmitButton
             label="Save and start Day 1"
             pendingLabel="Starting Day 1..."

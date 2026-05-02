@@ -208,6 +208,25 @@ function buildDashboardSnapshot(args: {
   };
 }
 
+function buildReminderSettings(
+  viewerTimezone: string,
+  reminderRow?: {
+    email_enabled?: boolean | null;
+    weekly_reminder_enabled?: boolean | null;
+    weekly_reminder_day?: number | null;
+    weekly_reminder_hour?: number | null;
+    timezone?: string | null;
+  } | null
+): ReminderSettings {
+  return {
+    emailEnabled: reminderRow?.email_enabled ?? true,
+    weeklyReminderEnabled: reminderRow?.weekly_reminder_enabled ?? true,
+    weeklyReminderDay: reminderRow?.weekly_reminder_day ?? 0,
+    weeklyReminderHour: reminderRow?.weekly_reminder_hour ?? 19,
+    timezone: reminderRow?.timezone || viewerTimezone
+  };
+}
+
 async function listAllAuthUsers(adminClient: ReturnType<typeof createSupabaseAdminClient>) {
   const users: Array<{
     id: string;
@@ -763,13 +782,7 @@ export async function getDashboardSnapshot() {
   return buildDashboardSnapshot({
     mode: "supabase",
     profile: viewer.profile,
-    reminderSettings: {
-      emailEnabled: false,
-      weeklyReminderEnabled: false,
-      weeklyReminderDay: reminderRow?.weekly_reminder_day ?? 0,
-      weeklyReminderHour: reminderRow?.weekly_reminder_hour ?? 19,
-      timezone: reminderRow?.timezone || viewer.profile.timezone
-    },
+    reminderSettings: buildReminderSettings(viewer.profile.timezone, reminderRow),
     planName: planTemplate?.name || "Placement Sprint",
     totalDays: planTemplate?.duration_days || 90,
     startDate,
@@ -920,13 +933,7 @@ export async function getSettingsSnapshot(): Promise<SettingsSnapshot | null> {
   return {
     mode: "supabase",
     profile: viewer.profile,
-    reminderSettings: {
-      emailEnabled: false,
-      weeklyReminderEnabled: false,
-      weeklyReminderDay: reminderRow?.weekly_reminder_day ?? 0,
-      weeklyReminderHour: reminderRow?.weekly_reminder_hour ?? 19,
-      timezone: reminderRow?.timezone || viewer.profile.timezone
-    }
+    reminderSettings: buildReminderSettings(viewer.profile.timezone, reminderRow)
   };
 }
 

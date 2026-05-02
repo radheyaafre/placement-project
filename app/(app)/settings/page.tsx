@@ -13,6 +13,9 @@ export default async function SettingsPage({
   const params = await searchParams;
   const settings = await getSettingsSnapshot();
   const saved = typeof params.saved === "string" ? params.saved : "";
+  const reminderEnabled =
+    settings?.reminderSettings.emailEnabled &&
+    settings?.reminderSettings.weeklyReminderEnabled;
 
   if (!settings) {
     return null;
@@ -80,6 +83,24 @@ export default async function SettingsPage({
               defaultValue={settings.profile.timezone}
             />
           </div>
+          <label className="toggle-field" htmlFor="weeklyReminderEnabled">
+            <input
+              className="toggle-field__input"
+              id="weeklyReminderEnabled"
+              name="weeklyReminderEnabled"
+              type="checkbox"
+              defaultChecked={reminderEnabled}
+            />
+            <span className="toggle-field__control" aria-hidden="true" />
+            <span className="toggle-field__copy">
+              <span className="toggle-field__title">Weekly email reminder</span>
+              <span className="toggle-field__hint">
+                We handle the schedule in the system. If this stays on, you get one
+                summary email every 7 days with progress, pending days, and category
+                counts.
+              </span>
+            </span>
+          </label>
           <SubmitButton label="Save settings" pendingLabel="Saving settings..." />
         </form>
       </SectionCard>

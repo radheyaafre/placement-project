@@ -41,6 +41,11 @@ function readNumber(formData: FormData, key: string, defaultValue: number) {
   return Number.isFinite(value) ? value : defaultValue;
 }
 
+function readBoolean(formData: FormData, key: string) {
+  const value = formData.get(key);
+  return value === "on" || value === "true" || value === "1";
+}
+
 function readAnswers(formData: FormData, questionIds: string[]) {
   return questionIds.reduce<Record<string, string>>((acc, questionId) => {
     const value = readString(formData, `answer_${questionId}`);
@@ -291,6 +296,10 @@ export async function saveOnboardingAction(formData: FormData) {
   const fullName = readString(formData, "fullName");
   const collegeName = readString(formData, "collegeName");
   const targetRole = readString(formData, "targetRole");
+  const weeklyReminderEnabled = readBoolean(
+    formData,
+    "weeklyReminderEnabled"
+  );
   const timezone = readString(formData, "timezone", {
     defaultValue: "Asia/Kolkata"
   });
@@ -315,8 +324,8 @@ export async function saveOnboardingAction(formData: FormData) {
       reminderSettings: {
         ...current.reminderSettings,
         timezone,
-        emailEnabled: false,
-        weeklyReminderEnabled: false,
+        emailEnabled: weeklyReminderEnabled,
+        weeklyReminderEnabled,
         weeklyReminderDay: 0,
         weeklyReminderHour: 19
       }
@@ -387,8 +396,8 @@ export async function saveOnboardingAction(formData: FormData) {
 
   await supabase.from("reminder_preferences").upsert({
     user_id: viewer.userId,
-    email_enabled: false,
-    weekly_reminder_enabled: false,
+    email_enabled: weeklyReminderEnabled,
+    weekly_reminder_enabled: weeklyReminderEnabled,
     weekly_reminder_day: 0,
     weekly_reminder_hour: 19,
     timezone
@@ -403,6 +412,10 @@ export async function saveSettingsAction(formData: FormData) {
   const fullName = readString(formData, "fullName");
   const collegeName = readString(formData, "collegeName");
   const targetRole = readString(formData, "targetRole");
+  const weeklyReminderEnabled = readBoolean(
+    formData,
+    "weeklyReminderEnabled"
+  );
   const timezone = readString(formData, "timezone", {
     defaultValue: "Asia/Kolkata"
   });
@@ -422,8 +435,8 @@ export async function saveSettingsAction(formData: FormData) {
       reminderSettings: {
         ...current.reminderSettings,
         timezone,
-        emailEnabled: false,
-        weeklyReminderEnabled: false,
+        emailEnabled: weeklyReminderEnabled,
+        weeklyReminderEnabled,
         weeklyReminderDay: 0,
         weeklyReminderHour: 19
       }
@@ -453,8 +466,8 @@ export async function saveSettingsAction(formData: FormData) {
 
   await supabase.from("reminder_preferences").upsert({
     user_id: viewer.userId,
-    email_enabled: false,
-    weekly_reminder_enabled: false,
+    email_enabled: weeklyReminderEnabled,
+    weekly_reminder_enabled: weeklyReminderEnabled,
     weekly_reminder_day: 0,
     weekly_reminder_hour: 19,
     timezone
