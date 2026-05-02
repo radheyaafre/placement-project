@@ -67,6 +67,8 @@ export default async function ProgressPage() {
     availableMissionStates.length || Math.min(data.snapshot.currentDay, data.snapshot.totalDays);
   const pendingSoFarCount = data.snapshot.pendingCount;
   const planStartDate = parseLocalDate(data.snapshot.startDate);
+  const completedDayWord = completedSoFarCount === 1 ? "day" : "days";
+  const pendingDayWord = pendingSoFarCount === 1 ? "day" : "days";
 
   return (
     <div className="stack">
@@ -74,10 +76,20 @@ export default async function ProgressPage() {
         <div className="hero-copy">
           <p className="eyebrow">Progress</p>
           <h1 className="app-page-title">Your Progress</h1>
-          <p>
-            Day {data.snapshot.currentDay} of {data.snapshot.totalDays}. Completed and
-            pending days from your 90-day plan.
-          </p>
+          <div className="callout">
+            <p>
+              <strong>In progress:</strong> Day {data.snapshot.currentDay} of{" "}
+              {data.snapshot.totalDays}. Completed{" "}
+              <strong>
+                {completedSoFarCount} {completedDayWord}
+              </strong>{" "}
+              and pending{" "}
+              <strong>
+                {pendingSoFarCount} {pendingDayWord}
+              </strong>{" "}
+              from your 90-day plan.
+            </p>
+          </div>
         </div>
       </section>
 
