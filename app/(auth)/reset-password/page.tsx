@@ -19,7 +19,8 @@ export default function ResetPasswordPage() {
             : "This flow needs Supabase auth to be configured."}
         </p>
         <p className="muted">
-          If the link says it has expired, request a fresh reset email and use the newest one.
+          If the email is not in inbox, check spam or promotions. If the link says it has
+          expired, request a fresh reset email and use the newest one.
         </p>
         <ResetPasswordForm />
         <p className="muted">

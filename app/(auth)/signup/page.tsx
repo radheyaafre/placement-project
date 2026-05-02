@@ -42,6 +42,18 @@ export default async function SignupPage({
             ? "Start simple, stay consistent, and unlock one mission at a time."
             : "In demo mode this will skip straight into onboarding with sample data."}
         </p>
+        {isSupabaseConfigured() ? (
+          <div className="callout">
+            <p>
+              Verification emails can sometimes land in <strong>spam</strong> or{" "}
+              <strong>promotions</strong>.
+            </p>
+            <p className="muted">
+              After you create the account, check those folders too and open the newest
+              verification email.
+            </p>
+          </div>
+        ) : null}
         {error ? <div className="notice">{error}</div> : null}
         <form action={signUpAction} className="stack">
           <input type="hidden" name="next" value={nextPath} />

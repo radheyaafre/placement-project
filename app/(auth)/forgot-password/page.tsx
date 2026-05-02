@@ -29,6 +29,18 @@ export default async function ForgotPasswordPage({
             ? "Enter your email and Supabase will send a password reset link."
             : "Supabase is not configured in this environment, so reset emails are unavailable in demo mode."}
         </p>
+        {isSupabaseConfigured() ? (
+          <div className="callout">
+            <p>
+              Reset emails can sometimes land in <strong>spam</strong> or{" "}
+              <strong>promotions</strong>.
+            </p>
+            <p className="muted">
+              If the email does not show up in inbox, check those folders and open the
+              newest reset email.
+            </p>
+          </div>
+        ) : null}
         {notice ? <div className="notice">{notice}</div> : null}
         {error ? <div className="notice">{error}</div> : null}
         <form action={requestPasswordResetAction} className="stack">

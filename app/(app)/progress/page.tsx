@@ -1,14 +1,32 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 import { SectionCard } from "@/components/section-card";
 import { StatusBadge } from "@/components/status-badge";
-import { getProgressSnapshot } from "@/lib/data";
-import { formatPlanDate, formatTaskType, parseLocalDate, percent, shiftDays } from "@/lib/utils";
+import { getProgressSnapshot, getViewerStudentPlanState } from "@/lib/data";
+import {
+  buildRedirect,
+  formatPlanDate,
+  formatTaskType,
+  parseLocalDate,
+  percent,
+  shiftDays
+} from "@/lib/utils";
 
 export default async function ProgressPage() {
   const data = await getProgressSnapshot();
 
   if (!data) {
+    const planState = await getViewerStudentPlanState();
+
+    if (planState === "missing") {
+      redirect(
+        buildRedirect("/onboarding", {
+          error: "Complete onboarding once to start your 90-day plan."
+        })
+      );
+    }
+
     return (
       <div className="stack">
         <SectionCard title="App unavailable" eyebrow="Live data required">

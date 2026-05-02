@@ -1,10 +1,16 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 import { SectionCard } from "@/components/section-card";
 import { StatusBadge } from "@/components/status-badge";
-import { getDashboardSnapshot } from "@/lib/data";
+import { getDashboardSnapshot, getViewerStudentPlanState } from "@/lib/data";
 import { deriveMissionStatus } from "@/lib/plan";
-import { formatPlanDate, parseLocalDate, shiftDays } from "@/lib/utils";
+import {
+  buildRedirect,
+  formatPlanDate,
+  parseLocalDate,
+  shiftDays
+} from "@/lib/utils";
 import type { MissionStatus } from "@/types/domain";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
@@ -35,6 +41,16 @@ export default async function DashboardPage({
   const error = typeof params.error === "string" ? params.error : "";
 
   if (!snapshot) {
+    const planState = await getViewerStudentPlanState();
+
+    if (planState === "missing") {
+      redirect(
+        buildRedirect("/onboarding", {
+          error: "Complete onboarding once to start your 90-day plan."
+        })
+      );
+    }
+
     return (
       <div className="stack">
         {error ? <div className="notice">{error}</div> : null}

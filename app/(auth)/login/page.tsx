@@ -52,6 +52,14 @@ export default async function LoginPage({
             ? "Use your email and password to open today&apos;s placement task."
             : "Supabase is not configured yet, so this screen works as a gateway into demo mode."}
         </p>
+        {isSupabaseConfigured() ? (
+          <div className="callout">
+            <p>If you just signed up or requested a reset, check spam or promotions too.</p>
+            <p className="muted">
+              Use the newest email link if multiple verification or recovery emails arrive.
+            </p>
+          </div>
+        ) : null}
         {notice ? <div className="notice">{notice}</div> : null}
         {error ? <div className="notice">{error}</div> : null}
         <form action={signInAction} className="stack">

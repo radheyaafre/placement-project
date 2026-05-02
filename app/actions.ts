@@ -240,7 +240,8 @@ export async function signUpAction(formData: FormData) {
   if (!data.session) {
     redirect(
       buildRedirect("/login", {
-        notice: "Check your email to verify the account, then sign in.",
+        notice:
+          "Check your email to verify the account, then sign in. If you do not see it in inbox, check spam or promotions and use the newest email.",
         next: nextPath
       })
     );
@@ -287,7 +288,7 @@ export async function requestPasswordResetAction(formData: FormData) {
   redirect(
     buildRedirect("/forgot-password", {
       notice:
-        "If that email exists in the system, a password reset link has been sent."
+        "If that email exists in the system, a password reset link has been sent. If you do not see it in inbox, check spam or promotions and use the newest email."
     })
   );
 }

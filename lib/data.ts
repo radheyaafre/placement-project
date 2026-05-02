@@ -791,6 +791,34 @@ export async function getDashboardSnapshot() {
   });
 }
 
+export async function getViewerStudentPlanState(): Promise<
+  "present" | "missing" | "unknown"
+> {
+  if (!isSupabaseConfigured()) {
+    return "present";
+  }
+
+  const viewer = await getViewerContext();
+
+  if (!viewer.userId) {
+    return "unknown";
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("student_plans")
+    .select("id")
+    .eq("user_id", viewer.userId)
+    .eq("status", "active")
+    .maybeSingle();
+
+  if (error) {
+    return "unknown";
+  }
+
+  return data?.id ? "present" : "missing";
+}
+
 export async function getMissionDetail(taskId: string): Promise<MissionDetail | null> {
   const snapshot = await getDashboardSnapshot();
 
