@@ -1165,7 +1165,7 @@ button {
     linear-gradient(180deg, rgba(19, 23, 30, 0.95), rgba(16, 19, 25, 0.96));
 }
 
-.task-row--locked::before {
+.task-row.task-row--locked::before {
   background: linear-gradient(180deg, rgba(248, 113, 113, 0.92), rgba(239, 68, 68, 0.7));
 }
 
