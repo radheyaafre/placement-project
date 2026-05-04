@@ -1,16 +1,28 @@
 import type { MissionStatus, TaskType } from "@/types/domain";
 
-function getDateParts(date: Date, timeZone?: string) {
-  if (!timeZone) {
-    return {
-      year: date.getFullYear(),
-      month: date.getMonth() + 1,
-      day: date.getDate()
-    };
+export const DEFAULT_TIMEZONE = "Asia/Kolkata";
+
+export function normalizeTimezone(timeZone?: string | null) {
+  const value = (timeZone || "").trim();
+
+  if (!value) {
+    return DEFAULT_TIMEZONE;
   }
 
+  try {
+    new Intl.DateTimeFormat("en-US", { timeZone: value }).format(new Date());
+  } catch {
+    return DEFAULT_TIMEZONE;
+  }
+
+  return DEFAULT_TIMEZONE;
+}
+
+function getDateParts(date: Date, timeZone?: string) {
+  const safeTimeZone = normalizeTimezone(timeZone);
+
   const formatter = new Intl.DateTimeFormat("en-CA", {
-    timeZone,
+    timeZone: safeTimeZone,
     year: "numeric",
     month: "2-digit",
     day: "2-digit"

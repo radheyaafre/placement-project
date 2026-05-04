@@ -78,16 +78,7 @@ export default async function OnboardingPage({
               defaultValue={settings.profile.targetRole}
             />
           </div>
-          <div className="field">
-            <label htmlFor="timezone">Timezone</label>
-            <input
-              className="input"
-              id="timezone"
-              name="timezone"
-              type="text"
-              defaultValue={settings.profile.timezone}
-            />
-          </div>
+          <p className="muted">Your plan will follow India time for all students.</p>
           <label className="toggle-field" htmlFor="weeklyReminderEnabled">
             <input
               className="toggle-field__input"

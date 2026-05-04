@@ -69,10 +69,7 @@ export default async function SignupPage({
             <label htmlFor="password">Password</label>
             <input className="input" id="password" name="password" type="password" placeholder="Create a password" />
           </div>
-          <div className="field">
-            <label htmlFor="timezone">Timezone</label>
-            <input className="input" id="timezone" name="timezone" type="text" defaultValue="Asia/Kolkata" />
-          </div>
+          <p className="muted">All schedules in this app follow India time.</p>
           <SubmitButton
             label={isSupabaseConfigured() ? "Create account" : "Open demo onboarding"}
             pendingLabel={

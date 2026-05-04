@@ -7,6 +7,7 @@ import {
   demoReminderSettings
 } from "@/lib/sample-data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { DEFAULT_TIMEZONE } from "@/lib/utils";
 
 const ADMIN_EMAIL_ALLOWLIST = new Set(["radheya.afre@gmail.com"]);
 
@@ -22,7 +23,7 @@ function mergeDemoProfile(state: Awaited<ReturnType<typeof getDemoState>>): Stud
     fullName: state.profile.fullName || demoProfile.fullName,
     collegeName: state.profile.collegeName || demoProfile.collegeName,
     targetRole: state.profile.targetRole || demoProfile.targetRole,
-    timezone: state.profile.timezone || demoProfile.timezone,
+    timezone: DEFAULT_TIMEZONE,
     role: state.profile.role || demoProfile.role,
     fullAccess: state.profile.fullAccess ?? demoProfile.fullAccess
   };
@@ -34,7 +35,7 @@ export async function getDemoSettings(): Promise<ReminderSettings> {
   return {
     ...demoReminderSettings,
     ...state.reminderSettings,
-    timezone: state.reminderSettings.timezone || demoReminderSettings.timezone,
+    timezone: DEFAULT_TIMEZONE,
     emailEnabled:
       state.reminderSettings.emailEnabled ?? demoReminderSettings.emailEnabled,
     weeklyReminderEnabled:
@@ -100,7 +101,7 @@ export async function getViewerContext(): Promise<ViewerContext> {
       "Student",
     collegeName: profileRow?.college_name || "",
     targetRole: profileRow?.target_role || "Software Engineer",
-    timezone: profileRow?.timezone || "Asia/Kolkata",
+    timezone: DEFAULT_TIMEZONE,
     role: isAdmin ? "admin" : "student",
     fullAccess
   };

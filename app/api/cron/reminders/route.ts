@@ -8,7 +8,7 @@ import {
   type WeeklyReminderPendingMission
 } from "@/lib/reminders";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
-import { asArray } from "@/lib/utils";
+import { asArray, DEFAULT_TIMEZONE } from "@/lib/utils";
 import type { TaskType } from "@/types/domain";
 
 export const runtime = "nodejs";
@@ -383,7 +383,7 @@ export async function GET(request: Request) {
     const reminder = reminderByUserId.get(plan.user_id) || null;
     const template = templateById.get(plan.plan_template_id);
     const email = emailByUserId.get(plan.user_id) || "";
-    const timeZone = reminder?.timezone || profile?.timezone || "Asia/Kolkata";
+    const timeZone = DEFAULT_TIMEZONE;
     const totalDays = template?.duration_days || 90;
     const currentDay = calculateCurrentDay(
       plan.start_date,

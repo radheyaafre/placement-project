@@ -17,6 +17,7 @@ import { usesDirectCompleteFlow } from "@/lib/plan";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
   buildRedirect,
+  DEFAULT_TIMEZONE,
   getSafeNextPath,
   looksLikeUuid,
   toDateOnly,
@@ -211,9 +212,7 @@ export async function signUpAction(formData: FormData) {
   const email = readString(formData, "email");
   const password = readString(formData, "password");
   const nextPath = getSafeNextPath(readString(formData, "next"), "/onboarding");
-  const timezone = readString(formData, "timezone", {
-    defaultValue: "Asia/Kolkata"
-  });
+  const timezone = DEFAULT_TIMEZONE;
 
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase.auth.signUp({
@@ -301,9 +300,7 @@ export async function saveOnboardingAction(formData: FormData) {
     formData,
     "weeklyReminderEnabled"
   );
-  const timezone = readString(formData, "timezone", {
-    defaultValue: "Asia/Kolkata"
-  });
+  const timezone = DEFAULT_TIMEZONE;
 
   if (!fullName) {
     redirect(buildRedirect("/onboarding", { error: "Please add your name." }));
@@ -417,9 +414,7 @@ export async function saveSettingsAction(formData: FormData) {
     formData,
     "weeklyReminderEnabled"
   );
-  const timezone = readString(formData, "timezone", {
-    defaultValue: "Asia/Kolkata"
-  });
+  const timezone = DEFAULT_TIMEZONE;
 
   if (!isSupabaseConfigured()) {
     const current = await getDemoState();

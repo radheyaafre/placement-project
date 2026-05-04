@@ -32,10 +32,10 @@ export default async function SettingsPage({
           </p>
         </div>
         <div className="summary-tile">
-          <span className="eyebrow">Timezone</span>
-          <strong>{settings.profile.timezone}</strong>
+          <span className="eyebrow">Schedule</span>
+          <strong>India time</strong>
           <p className="muted">
-            Your daily plan follows this timezone.
+            All students follow the same timing across the app.
           </p>
         </div>
       </div>
@@ -73,16 +73,7 @@ export default async function SettingsPage({
               defaultValue={settings.profile.targetRole}
             />
           </div>
-          <div className="field">
-            <label htmlFor="timezone">Timezone</label>
-            <input
-              className="input"
-              id="timezone"
-              name="timezone"
-              type="text"
-              defaultValue={settings.profile.timezone}
-            />
-          </div>
+          <p className="muted">Schedules and unlocks now run on India time only.</p>
           <label className="toggle-field" htmlFor="weeklyReminderEnabled">
             <input
               className="toggle-field__input"

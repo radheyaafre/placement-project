@@ -33,7 +33,13 @@ import {
 } from "@/lib/sample-data";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { asArray, percent, splitParagraphs, toDateOnly } from "@/lib/utils";
+import {
+  asArray,
+  DEFAULT_TIMEZONE,
+  percent,
+  splitParagraphs,
+  toDateOnly
+} from "@/lib/utils";
 
 function mapSupabaseMission(dayRow: any): Mission | null {
   const taskRow = asArray(dayRow.tasks)[0];
@@ -112,7 +118,7 @@ function buildDashboardSnapshot(args: {
   const currentDay = calculateCurrentDay(
     args.startDate,
     args.totalDays,
-    args.profile.timezone || args.reminderSettings.timezone
+    DEFAULT_TIMEZONE
   );
   const visibilityDay = args.profile.fullAccess ? args.totalDays : currentDay;
   const currentWeek = calculateWeekNumber(currentDay);
@@ -209,7 +215,7 @@ function buildDashboardSnapshot(args: {
 }
 
 function buildReminderSettings(
-  viewerTimezone: string,
+  _viewerTimezone: string,
   reminderRow?: {
     email_enabled?: boolean | null;
     weekly_reminder_enabled?: boolean | null;
@@ -223,7 +229,7 @@ function buildReminderSettings(
     weeklyReminderEnabled: reminderRow?.weekly_reminder_enabled ?? true,
     weeklyReminderDay: reminderRow?.weekly_reminder_day ?? 0,
     weeklyReminderHour: reminderRow?.weekly_reminder_hour ?? 19,
-    timezone: reminderRow?.timezone || viewerTimezone
+    timezone: DEFAULT_TIMEZONE
   };
 }
 
@@ -533,7 +539,7 @@ export async function getAdminDashboardSnapshot(): Promise<AdminDashboardSnapsho
         ? calculateCurrentDay(
             planRow.startDate,
             planRow.durationDays,
-            profileRow?.timezone || "Asia/Kolkata"
+            DEFAULT_TIMEZONE
           )
         : null;
       const availableDays = currentDay && planRow ? Math.min(currentDay, planRow.durationDays) : 0;
@@ -556,7 +562,7 @@ export async function getAdminDashboardSnapshot(): Promise<AdminDashboardSnapsho
         email: authUser.email,
         collegeName: profileRow?.college_name || "",
         targetRole: profileRow?.target_role || "Software Engineer",
-        timezone: profileRow?.timezone || "Asia/Kolkata",
+        timezone: DEFAULT_TIMEZONE,
         hasActivePlan: Boolean(planRow),
         startDate: planRow?.startDate || null,
         currentDay,
@@ -644,7 +650,7 @@ export async function getDashboardSnapshot() {
       fullName: state.profile.fullName || demoProfile.fullName,
       collegeName: state.profile.collegeName || demoProfile.collegeName,
       targetRole: state.profile.targetRole || demoProfile.targetRole,
-      timezone: state.profile.timezone || demoProfile.timezone,
+      timezone: DEFAULT_TIMEZONE,
       role: state.profile.role || demoProfile.role,
       fullAccess: state.profile.fullAccess ?? demoProfile.fullAccess
     };
@@ -681,7 +687,7 @@ export async function getDashboardSnapshot() {
   }
 
   const startDate =
-    planRow?.start_date || toDateOnly(new Date(), viewer.profile.timezone);
+    planRow?.start_date || toDateOnly(new Date(), DEFAULT_TIMEZONE);
 
   const { data: planTemplate } = await supabase
     .from("plan_templates")
