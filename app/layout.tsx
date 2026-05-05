@@ -3,11 +3,56 @@ import type { ReactNode } from "react";
 
 import "@/app/globals.css";
 import { NavigationFeedback } from "@/components/navigation-feedback";
+import { getAppUrl } from "@/lib/env";
+
+const siteUrl = getAppUrl();
 
 export const metadata: Metadata = {
-  title: "Placement Prep",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: "SamyakLabs.AI | Placement Prep, AI Training, and Internships in Nashik",
+    template: "%s | SamyakLabs.AI"
+  },
   description:
-    "A 90-day motivation-based placement preparation tracker for aptitude, DSA, SQL, and HR practice."
+    "SamyakLabs.AI offers a 90-day placement preparation app, AI training, GenAI training, diploma and degree classes, 1:1 mentoring, Codex guidance, AI-based development support, and internship-focused programs for students in Nashik and beyond.",
+  keywords: [
+    "best placement preparation app",
+    "placement preparation app in Nashik",
+    "placement institute in Nashik",
+    "internship in Nashik",
+    "AI internship in Nashik",
+    "AI training in Nashik",
+    "virtual AI training",
+    "Gen AI training",
+    "1:1 mentoring",
+    "diploma classes Nashik",
+    "degree classes Nashik",
+    "Codex training",
+    "AI based development",
+    "diploma internships Nashik",
+    "degree internship Nashik",
+    "KKW internship",
+    "placement prep app",
+    "SamyakLabs AI"
+  ],
+  alternates: {
+    canonical: "/"
+  },
+  openGraph: {
+    title: "SamyakLabs.AI",
+    description:
+      "Placement preparation, AI training, GenAI training, diploma and degree classes, student internships, and practical learning programs for students in Nashik and online.",
+    url: siteUrl,
+    siteName: "SamyakLabs.AI",
+    type: "website"
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "SamyakLabs.AI",
+    description:
+      "Placement prep, AI training, GenAI training, mentoring, and internship-focused learning for students in Nashik and beyond."
+  },
+  category: "education"
 };
 
 export default function RootLayout({
