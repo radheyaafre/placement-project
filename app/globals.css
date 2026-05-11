@@ -1926,6 +1926,49 @@ button {
   max-width: 760px;
 }
 
+.admin-broadcast-form {
+  max-width: 100%;
+}
+
+.admin-broadcast-grid {
+  display: grid;
+  gap: 10px;
+  max-height: 320px;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.admin-broadcast-user {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(24, 28, 36, 0.92);
+  cursor: pointer;
+}
+
+.admin-broadcast-user input {
+  margin-top: 0.2rem;
+}
+
+.admin-broadcast-user__copy {
+  display: grid;
+  gap: 4px;
+}
+
+.admin-broadcast-user__copy strong {
+  font-size: 0.96rem;
+}
+
+.admin-broadcast-user__copy span {
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
 .progress-bar {
   width: 100%;
   min-height: 12px;

@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { AdminBroadcastForm } from "@/components/admin-broadcast-form";
 import { SectionCard } from "@/components/section-card";
 import { StatusBadge } from "@/components/status-badge";
 import { getAdminDashboardSnapshot } from "@/lib/data";
@@ -138,6 +139,16 @@ export default async function AdminOverviewPage() {
       </div>
 
       <div className="split-panel">
+        <SectionCard title="Send email" eyebrow="Admin outreach">
+          <div className="stack">
+            <p className="muted">
+              Select the student profiles you want, write the subject and message,
+              and trigger a direct email from the admin console.
+            </p>
+            <AdminBroadcastForm users={snapshot.userOverview} />
+          </div>
+        </SectionCard>
+
         <SectionCard title="Recent activity" eyebrow="Latest student actions">
           <div className="table-like">
             {snapshot.recentActivity.length ? (

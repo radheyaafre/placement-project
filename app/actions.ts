@@ -11,9 +11,11 @@ import {
   getBugReportToEmail,
   getResendFromEmail,
   isBugReportConfigured,
+  isResendConfigured,
   isSupabaseConfigured
 } from "@/lib/env";
 import { usesDirectCompleteFlow } from "@/lib/plan";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
   buildRedirect,
@@ -64,13 +66,16 @@ type BugReportActionState = {
   message: string;
 };
 
-async function sendBugReportEmail(params: {
-  report: string;
-  source: string;
-  reporterName: string;
-  reporterEmail: string;
-  reporterMode: string;
-  reporterUserId: string;
+export type AdminBroadcastActionState = {
+  status: "idle" | "success" | "error";
+  message: string;
+};
+
+async function sendResendEmail(params: {
+  to: string | string[];
+  subject: string;
+  text: string;
+  html?: string;
 }) {
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
@@ -80,21 +85,10 @@ async function sendBugReportEmail(params: {
     },
     body: JSON.stringify({
       from: getResendFromEmail(),
-      to: getBugReportToEmail(),
-      subject: `Placement Prep bug report${
-        params.reporterName !== "Public visitor" ? ` from ${params.reporterName}` : ""
-      }`,
-      text: [
-        `Source: ${params.source}`,
-        `Reporter: ${params.reporterName}`,
-        `Reporter email: ${params.reporterEmail || "Not available"}`,
-        `Mode: ${params.reporterMode}`,
-        `User ID: ${params.reporterUserId || "Not available"}`,
-        `Sent at: ${new Date().toISOString()}`,
-        "",
-        "Bug details:",
-        params.report
-      ].join("\n")
+      to: params.to,
+      subject: params.subject,
+      text: params.text,
+      html: params.html
     })
   });
 
@@ -106,9 +100,166 @@ async function sendBugReportEmail(params: {
   const message =
     typeof payload?.message === "string"
       ? payload.message
-      : "Unable to send the bug report right now.";
+      : "Unable to send email right now.";
 
   throw new Error(message);
+}
+
+async function listAllAuthUsersForAdmin() {
+  const adminClient = createSupabaseAdminClient();
+  const users: Array<{
+    id: string;
+    email: string;
+  }> = [];
+
+  let page = 1;
+
+  while (true) {
+    const { data, error } = await adminClient.auth.admin.listUsers({
+      page,
+      perPage: 1000
+    });
+
+    if (error) {
+      throw error;
+    }
+
+    const batch = data?.users || [];
+
+    users.push(
+      ...batch.map((user) => ({
+        id: user.id,
+        email: user.email || ""
+      }))
+    );
+
+    if (batch.length < 1000) {
+      break;
+    }
+
+    page += 1;
+  }
+
+  return users;
+}
+
+async function sendBugReportEmail(params: {
+  report: string;
+  source: string;
+  reporterName: string;
+  reporterEmail: string;
+  reporterMode: string;
+  reporterUserId: string;
+}) {
+  await sendResendEmail({
+    to: getBugReportToEmail(),
+    subject: `Placement Prep bug report${
+      params.reporterName !== "Public visitor" ? ` from ${params.reporterName}` : ""
+    }`,
+    text: [
+      `Source: ${params.source}`,
+      `Reporter: ${params.reporterName}`,
+      `Reporter email: ${params.reporterEmail || "Not available"}`,
+      `Mode: ${params.reporterMode}`,
+      `User ID: ${params.reporterUserId || "Not available"}`,
+      `Sent at: ${new Date().toISOString()}`,
+      "",
+      "Bug details:",
+      params.report
+    ].join("\n")
+  });
+}
+
+export async function sendAdminBroadcastAction(
+  _prevState: AdminBroadcastActionState,
+  formData: FormData
+): Promise<AdminBroadcastActionState> {
+  const subject = readString(formData, "subject");
+  const message = readString(formData, "message");
+  const selectedUserIds = unique(
+    formData
+      .getAll("userIds")
+      .filter((value): value is string => typeof value === "string")
+      .map((value) => value.trim())
+      .filter(Boolean)
+  );
+
+  if (!subject) {
+    return {
+      status: "error",
+      message: "Add an email subject first."
+    };
+  }
+
+  if (!message) {
+    return {
+      status: "error",
+      message: "Add the email message first."
+    };
+  }
+
+  if (!selectedUserIds.length) {
+    return {
+      status: "error",
+      message: "Select at least one student profile."
+    };
+  }
+
+  if (!isResendConfigured()) {
+    return {
+      status: "error",
+      message: "Email sending is not configured yet. Add RESEND_API_KEY and REMINDER_FROM_EMAIL."
+    };
+  }
+
+  const viewer = await getViewerContext();
+
+  if (!viewer.isAdmin) {
+    return {
+      status: "error",
+      message: "Admin access is required to send emails."
+    };
+  }
+
+  try {
+    const authUsers = await listAllAuthUsersForAdmin();
+    const emailTargets = authUsers
+      .filter((user) => selectedUserIds.includes(user.id) && user.email)
+      .map((user) => user.email);
+
+    if (!emailTargets.length) {
+      return {
+        status: "error",
+        message: "No valid email addresses were found for the selected profiles."
+      };
+    }
+
+    const text = `${message}\n\nSent from SamyakLabs.AI admin console.`;
+    const html = `<div style=\"font-family:Arial,sans-serif;line-height:1.6;color:#111827;white-space:pre-wrap;\">${message.replace(
+      /&/g,
+      "&amp;"
+    ).replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br />")}<br /><br />Sent from SamyakLabs.AI admin console.</div>`;
+
+    await sendResendEmail({
+      to: emailTargets,
+      subject,
+      text,
+      html
+    });
+
+    return {
+      status: "success",
+      message: `Email sent to ${emailTargets.length} selected profile(s).`
+    };
+  } catch (error) {
+    return {
+      status: "error",
+      message:
+        error instanceof Error
+          ? error.message
+          : "Unable to send the admin email right now."
+    };
+  }
 }
 
 export async function submitBugReportAction(
