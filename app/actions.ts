@@ -73,6 +73,7 @@ export type AdminBroadcastActionState = {
 
 async function sendResendEmail(params: {
   to: string | string[];
+  bcc?: string | string[];
   subject: string;
   text: string;
   html?: string;
@@ -86,6 +87,7 @@ async function sendResendEmail(params: {
     body: JSON.stringify({
       from: getResendFromEmail(),
       to: params.to,
+      bcc: params.bcc,
       subject: params.subject,
       text: params.text,
       html: params.html
@@ -241,7 +243,8 @@ export async function sendAdminBroadcastAction(
     ).replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br />")}<br /><br />Sent from SamyakLabs.AI admin console.</div>`;
 
     await sendResendEmail({
-      to: emailTargets,
+      to: getBugReportToEmail(),
+      bcc: emailTargets,
       subject,
       text,
       html
@@ -249,7 +252,7 @@ export async function sendAdminBroadcastAction(
 
     return {
       status: "success",
-      message: `Email sent to ${emailTargets.length} selected profile(s).`
+      message: `Email sent to ${emailTargets.length} selected profile(s) using hidden BCC recipients.`
     };
   } catch (error) {
     return {
