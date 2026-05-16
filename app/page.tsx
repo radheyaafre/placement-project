@@ -21,14 +21,14 @@ const siteUrl = getAppUrl();
 export const metadata: Metadata = {
   title: "Placement Preparation App in Nashik",
   description:
-    "SamyakLabs.AI offers a 90-day placement preparation app for aptitude, DSA, SQL, HR, and revision, along with public SEO support for AI training, internships, and mentoring.",
+    "SamyakLabs.AI offers a placement preparation portal with weekly sprint-style guided practice for aptitude, DSA, SQL, HR, and revision, along with AI training, internships, and mentoring support.",
   alternates: {
     canonical: "/"
   },
   openGraph: {
     title: "SamyakLabs.AI | Placement Preparation App",
     description:
-      "A 90-day guided placement preparation app from SamyakLabs.AI for students in Nashik and beyond.",
+      "A weekly sprint-style placement preparation portal from SamyakLabs.AI for students in Nashik and beyond.",
     url: siteUrl
   }
 };
@@ -99,10 +99,10 @@ export default async function HomePage({
             <span className="brand-mark__text">SamyakLabs.AI</span>
           </Link>
           <div>
-            <p className="eyebrow">90-day placement prep app</p>
+            <p className="eyebrow">Placement prep portal</p>
             <p className="marketing-header__meta">
-              Students get one clear daily task across aptitude, DSA, SQL, HR,
-              and revision so placement prep stays consistent and manageable.
+              Daily placement practice with a cleaner weekly sprint feel across
+              aptitude, DSA, SQL, HR, and revision.
             </p>
           </div>
         </div>
@@ -119,16 +119,16 @@ export default async function HomePage({
       <section className="hero-panel landing-hero landing-hero--simple">
         <div className="hero-grid home-hero-grid">
           <div className="hero-copy">
-            <p className="eyebrow">Placement prep</p>
+            <p className="eyebrow">Weekly placement sprint</p>
             <h1 className="landing-hero__title">
-              One focused hour daily for 90 days.
+              Placement prep, sprint by sprint.
             </h1>
             <p className="landing-hero__summary">
-              A simple daily practice app for students preparing for placements
-              across aptitude, DSA, SQL, HR, and revision.
+              A simple daily practice portal that helps students stop overthinking
+              what to study next and just begin.
             </p>
             <p className="landing-hero__flow">
-              Login. Complete setup once. Finish daily task. Mark completed.
+              Login. Finish setup once. Open your current sprint. Complete one task at a time.
             </p>
             <div className="hero-actions">
               <Link href="/signup" className="button" data-loading-label="Opening signup">
@@ -146,59 +146,70 @@ export default async function HomePage({
                 {secondaryLabel}
               </Link>
             </div>
+            <div className="hero-guide">
+              <div className="hero-guide__item">
+                <span className="hero-guide__index">01</span>
+                <p>
+                  Open the current sprint and start with the next unlocked task.
+                </p>
+              </div>
+              <div className="hero-guide__item">
+                <span className="hero-guide__index">02</span>
+                <p>
+                  Practice aptitude, DSA, SQL, HR, and revision in a guided order
+                  that feels clear and manageable.
+                </p>
+              </div>
+              <div className="hero-guide__item">
+                <span className="hero-guide__index">03</span>
+                <p>
+                  Complete the sprint, then unlock the next one. Missed tasks stay
+                  visible in Progress so nothing gets lost.
+                </p>
+              </div>
+            </div>
           </div>
 
           <aside className="landing-sidecard">
-            <p className="eyebrow">Why this exists</p>
-            <h2 className="landing-sidecard__title">A free 90-day kickstart for placement prep.</h2>
+            <p className="eyebrow">Why students need this</p>
+            <h2 className="landing-sidecard__title">A calm structure for placement prep that usually feels messy.</h2>
             <div className="landing-sidecard__copy landing-sidecard__copy--story">
               <p className="landing-sidecard__lead">
-                Let's be real. Too many resources, too many tabs, and still too
-                much confusion. Add distractions and inconsistency, and it becomes
-                easy to lose track. Even 30 to 40 minutes of focused work every day
-                can make a real difference.
-              </p>
-              <p>
-                To make the start easier, this free 90-day program is built to help
-                you begin and stay consistent. Starting at least 6 months before
-                placements is ideal, but if you have not started yet, this is still
-                a good time to begin.
+                Too many resources, too many tabs, and still no clear starting point.
+                That is where most students lose momentum.
               </p>
               <div className="landing-sidecard__section">
-                <p className="landing-sidecard__section-title">How it works</p>
+                <p className="landing-sidecard__section-title">What this portal does</p>
                 <ul className="landing-sidecard__list">
                   <li>
-                    After login, you complete one short setup form once so your
-                    90-day plan can begin from your own start date.
+                    It breaks placement prep into weekly sprints so the journey feels
+                    smaller, clearer, and easier to follow.
                   </li>
                   <li>
-                    Once setup is saved, the dashboard becomes your home and shows
-                    one clear task at a time across aptitude, DSA, SQL, HR, and more.
+                    It shows one task at a time inside the current sprint, so students
+                    spend more time practicing and less time planning.
                   </li>
                   <li>
-                    Finish today's task, and the next day unlocks after that while
-                    your progress stays visible.
+                    It keeps pending work visible in Progress, so skipped tasks can
+                    still be completed later without confusion.
                   </li>
                 </ul>
               </div>
               <p>
-                This is not the full placement journey by itself. You will still
-                need deeper study, projects, and serious practice outside the app.
-                Think of this as a kickstart that reduces confusion and makes the
-                next step clearer.
+                This is a kickstart, not the full placement strategy. Students still
+                need deeper study, projects, mock interviews, and serious practice
+                outside the app.
               </p>
               <p>
-                The app does not judge or rate your skills. It is here to support
-                your self-study, help you stay steady, and let you prepare at your
-                own pace.
+                The goal is simple: reduce confusion, support consistency, and keep
+                the next honest step visible.
               </p>
               <p>
-                This is a beta version, so if something breaks, use Report a bug in
-                the app or mail me directly. Feedback and suggestions are always
-                welcome.
+                It is still in beta, so feedback matters. If something breaks, use
+                Report a bug inside the app and we will keep improving it.
               </p>
               <p className="landing-sidecard__closing">
-                All the best. Stay consistent and go get that offer.
+                Start small. Stay steady. Let each sprint build confidence.
               </p>
             </div>
           </aside>

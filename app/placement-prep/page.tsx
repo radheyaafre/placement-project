@@ -4,7 +4,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Best Placement Preparation App for Students in Nashik",
   description:
-    "Explore the SamyakLabs.AI placement preparation app, a 90-day guided flow for aptitude, DSA, SQL, HR, and revision designed for students in Nashik and beyond.",
+    "Explore the SamyakLabs.AI placement preparation portal, a weekly sprint-style guided flow for aptitude, DSA, SQL, HR, and revision designed for students in Nashik and beyond.",
   alternates: {
     canonical: "/placement-prep"
   }
@@ -22,7 +22,7 @@ export default function PlacementPrepPage() {
           <div>
             <p className="eyebrow">Placement preparation</p>
             <p className="marketing-header__meta">
-              A guided 90-day placement preparation app for students.
+              A guided placement preparation portal for students.
             </p>
           </div>
         </div>
@@ -37,7 +37,7 @@ export default function PlacementPrepPage() {
       <section className="section-card public-section">
         <div className="stack">
           <p className="eyebrow">Placement prep app</p>
-          <h1 className="app-page-title">A structured 90-day placement preparation flow.</h1>
+          <h1 className="app-page-title">A structured placement sprint for students.</h1>
           <p className="muted">
             If a student searches for the best placement preparation app in Nashik,
             what they usually need is not another overwhelming course. They need a clear,

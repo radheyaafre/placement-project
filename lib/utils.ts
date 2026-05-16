@@ -107,7 +107,7 @@ export function formatPlanDate(date: Date) {
   const month = months[date.getMonth()]!;
   const year = date.getFullYear();
 
-  return `${day}-${month}-${year} ${formatWeekday(date.getDay())}`;
+  return `${day}-${month}-${year}`;
 }
 
 export function formatHour12(hour: number) {

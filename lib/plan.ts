@@ -64,6 +64,43 @@ export function calculateWeekNumber(dayNumber: number) {
   return Math.max(1, Math.ceil(dayNumber / 7));
 }
 
+export function calculateActiveSprintWeek(
+  missions: Mission[],
+  progressByTaskId: Record<string, MissionProgress>,
+  totalDays: number,
+  unlockAll = false
+) {
+  const maxWeek = Math.max(
+    1,
+    calculateWeekNumber(totalDays),
+    ...missions.map((mission) => mission.weekNumber)
+  );
+
+  if (unlockAll) {
+    return maxWeek;
+  }
+
+  for (let weekNumber = 1; weekNumber <= maxWeek; weekNumber += 1) {
+    const sprintMissions = missions.filter(
+      (mission) => mission.weekNumber === weekNumber
+    );
+
+    if (!sprintMissions.length) {
+      continue;
+    }
+
+    const sprintCompleted = sprintMissions.every(
+      (mission) => progressByTaskId[mission.id]?.status === "completed"
+    );
+
+    if (!sprintCompleted) {
+      return weekNumber;
+    }
+  }
+
+  return maxWeek;
+}
+
 export function buildDemoProgressMap(
   missions: Mission[],
   demoState: DemoState

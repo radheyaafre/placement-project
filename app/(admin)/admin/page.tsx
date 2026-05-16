@@ -21,9 +21,11 @@ function formatStudentPlan(user: {
   hasActivePlan: boolean;
   currentDay: number | null;
   totalDays: number | null;
+  activeSprint: number | null;
+  completedSprintCount: number;
   startDate: string | null;
 }) {
-  if (!user.hasActivePlan || !user.currentDay || !user.totalDays || !user.startDate) {
+  if (!user.hasActivePlan || !user.startDate) {
     return {
       label: "Not started",
       subtext: "Onboarding or active plan missing"
@@ -31,8 +33,11 @@ function formatStudentPlan(user: {
   }
 
   return {
-    label: `Day ${user.currentDay} / ${user.totalDays}`,
-    subtext: `Started ${formatPlanDate(parseLocalDate(user.startDate))}`
+    label: user.activeSprint ? `Sprint ${user.activeSprint}` : "Sprint not available",
+    subtext:
+      user.completedSprintCount > 0
+        ? `Finished ${user.completedSprintCount} sprint${user.completedSprintCount === 1 ? "" : "s"} • Started ${formatPlanDate(parseLocalDate(user.startDate))}`
+        : `Started ${formatPlanDate(parseLocalDate(user.startDate))}`
   };
 }
 
@@ -83,11 +88,11 @@ export default async function AdminOverviewPage() {
             <h1 className="app-page-title">All student activity, one clean view.</h1>
             <p>
               Track onboarding, current progress, recent work, and who needs attention
-              across the live placement program.
+              across the live sprint-based placement program.
             </p>
             <div className="focus-strip__meta">
               <span>{snapshot.activePlanName}</span>
-              <span>{snapshot.activePlanDurationDays}-day active plan</span>
+              <span>{Math.ceil(snapshot.activePlanDurationDays / 7)} sprint plan</span>
               <span>{snapshot.totalStudents} student accounts</span>
             </div>
           </div>
@@ -197,6 +202,15 @@ export default async function AdminOverviewPage() {
                 </div>
               ))}
             </div>
+            <div className="summary-grid">
+              {snapshot.sprintDistribution.map((item) => (
+                <div key={item.sprintNumber} className="summary-tile callout">
+                  <span className="eyebrow">Sprint {item.sprintNumber}</span>
+                  <strong>{item.students}</strong>
+                  <p className="muted">students currently here</p>
+                </div>
+              ))}
+            </div>
           </div>
         </SectionCard>
       </div>
@@ -230,6 +244,7 @@ export default async function AdminOverviewPage() {
                   </p>
 
                   <div className="focus-strip__meta">
+                    <span>{user.activeSprint ? `Sprint ${user.activeSprint}` : "No sprint"}</span>
                     <span>{user.completedCount} done</span>
                     <span>{user.inProgressCount} started</span>
                     <span>{user.completionPercent}% on track</span>

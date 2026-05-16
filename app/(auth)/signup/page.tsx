@@ -36,10 +36,10 @@ export default async function SignupPage({
           <span className="brand-mark__text">SamyakLabs.AI</span>
         </Link>
         <p className="eyebrow">Create account</p>
-        <h1 style={{ fontSize: "3.1rem" }}>Create your 90-day prep workspace.</h1>
+        <h1 style={{ fontSize: "2.6rem" }}>Create your placement sprint workspace.</h1>
         <p className="muted">
           {isSupabaseConfigured()
-            ? "Start simple, stay consistent, and unlock one mission at a time."
+            ? "Start simple, stay consistent, and unlock one task at a time."
             : "In demo mode this will skip straight into onboarding with sample data."}
         </p>
         {isSupabaseConfigured() ? (

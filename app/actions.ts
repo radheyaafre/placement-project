@@ -25,6 +25,7 @@ import {
   toDateOnly,
   unique
 } from "@/lib/utils";
+import type { MissionDetail } from "@/types/domain";
 
 function readString(
   formData: FormData,
@@ -78,6 +79,38 @@ function escapeHtml(value: string) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#39;");
+}
+
+function getPostCompletionRedirect(
+  detail: MissionDetail,
+  taskId: string,
+  completedMessage: string
+) {
+  const sprintMissions = detail.snapshot.missions.filter(
+    (mission) => mission.weekNumber === detail.mission.weekNumber
+  );
+  const completedSprintCount = sprintMissions.filter(
+    (mission) =>
+      mission.id === taskId ||
+      detail.snapshot.progressByTaskId[mission.id]?.status === "completed"
+  ).length;
+  const sprintCompleted =
+    sprintMissions.length > 0 && completedSprintCount === sprintMissions.length;
+
+  if (!sprintCompleted) {
+    return buildRedirect(`/mission/${taskId}`, { completed: completedMessage });
+  }
+
+  const nextSprintNumber = detail.mission.weekNumber + 1;
+  const hasNextSprint = detail.snapshot.missions.some(
+    (mission) => mission.weekNumber === nextSprintNumber
+  );
+
+  return buildRedirect("/dashboard", {
+    sprintCompleted: hasNextSprint
+      ? `Sprint ${detail.mission.weekNumber} completed. Sprint ${nextSprintNumber} is now unlocked.`
+      : `Sprint ${detail.mission.weekNumber} completed. You have finished the full sprint journey.`
+  });
 }
 
 function buildAdminBroadcastHtml(message: string) {
@@ -779,7 +812,8 @@ export async function submitMissionAttemptAction(formData: FormData) {
     revalidatePath(`/mission/${taskId}`);
     revalidatePath("/dashboard");
     revalidatePath("/progress");
-    redirect(buildRedirect(`/mission/${taskId}`, { completed: completedMessage }));
+    revalidatePath(`/sprint/${detail.mission.weekNumber}`);
+    redirect(getPostCompletionRedirect(detail, taskId, completedMessage));
   }
 
   const viewer = await getViewerContext();
@@ -869,7 +903,8 @@ export async function submitMissionAttemptAction(formData: FormData) {
   revalidatePath(`/mission/${taskId}`);
   revalidatePath("/dashboard");
   revalidatePath("/progress");
-  redirect(buildRedirect(`/mission/${taskId}`, { completed: completedMessage }));
+  revalidatePath(`/sprint/${detail.mission.weekNumber}`);
+  redirect(getPostCompletionRedirect(detail, taskId, completedMessage));
 }
 
 export async function completeMissionAction(formData: FormData) {
@@ -928,7 +963,8 @@ export async function completeMissionAction(formData: FormData) {
     revalidatePath(`/mission/${taskId}`);
     revalidatePath("/dashboard");
     revalidatePath("/progress");
-    redirect(buildRedirect(`/mission/${taskId}`, { completed: "Mission completed." }));
+    revalidatePath(`/sprint/${detail.mission.weekNumber}`);
+    redirect(getPostCompletionRedirect(detail, taskId, "Mission completed."));
   }
 
   const viewer = await getViewerContext();
@@ -985,7 +1021,8 @@ export async function completeMissionAction(formData: FormData) {
   revalidatePath(`/mission/${taskId}`);
   revalidatePath("/dashboard");
   revalidatePath("/progress");
-  redirect(buildRedirect(`/mission/${taskId}`, { completed: "Mission completed." }));
+  revalidatePath(`/sprint/${detail.mission.weekNumber}`);
+  redirect(getPostCompletionRedirect(detail, taskId, "Mission completed."));
 }
 
 export async function previewImportAction(formData: FormData) {

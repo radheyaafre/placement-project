@@ -69,14 +69,8 @@ export default async function MissionPage({
   const solution = detail.mission.solution ?? [];
   const usesDirectFlow = usesDirectCompleteFlow(detail.mission.taskType);
   const isHrMission = detail.mission.taskType === "hr";
-  const activeStep =
-    detail.status === "completed" || detail.canRevealSolution
-      ? 3
-      : usesDirectFlow
-        ? 2
-        : 1;
   const introCopy = usesDirectFlow
-    ? "Open the original problem link, solve it there, then mark the day done here."
+    ? "Open the original practice link, solve it there, then mark today as complete here."
     : detail.canRevealSolution
       ? isHrMission
         ? "Your answers are saved and this day is completed. Review them with the guidance below anytime."
@@ -89,7 +83,7 @@ export default async function MissionPage({
     <div className="stack">
       <SectionCard
         title={detail.mission.title}
-        eyebrow={`Day ${detail.mission.dayNumber} | Week ${detail.mission.weekNumber}`}
+        eyebrow={`Sprint ${detail.mission.weekNumber} • Day ${detail.mission.dayNumber}`}
         aside={
           <div className="pill-row">
             <StatusBadge taskType={detail.mission.taskType} />
@@ -108,38 +102,8 @@ export default async function MissionPage({
         {completed ? <div className="notice">{completed}</div> : null}
       </SectionCard>
 
-      <SectionCard title="How to do this" eyebrow="3 simple steps">
-        <div className="timeline-steps">
-          <div className={`timeline-step${activeStep >= 1 ? " timeline-step--active" : ""}`}>
-            <span className="timeline-step__index">1</span>
-            <strong>{usesDirectFlow ? "Read" : "Attempt"}</strong>
-            <p className="muted">
-              {usesDirectFlow
-                ? "Open the prompt and understand what you need to solve."
-                : "Answer honestly before you look at any hint or review."}
-            </p>
-          </div>
-          <div className={`timeline-step${activeStep >= 2 ? " timeline-step--active" : ""}`}>
-            <span className="timeline-step__index">2</span>
-            <strong>{usesDirectFlow ? "Solve" : "Review"}</strong>
-            <p className="muted">
-              {usesDirectFlow
-                ? "Use the original practice link and solve it outside the app."
-                : "Compare your answer with the hint, explanation, or saved review."}
-            </p>
-          </div>
-          <div className={`timeline-step${activeStep >= 3 ? " timeline-step--active" : ""}`}>
-            <span className="timeline-step__index">3</span>
-            <strong>Done</strong>
-            <p className="muted">
-              Finish the day cleanly so the next task stays easy to pick up.
-            </p>
-          </div>
-        </div>
-      </SectionCard>
-
       {usesDirectFlow ? (
-        <SectionCard title="Open the problem" eyebrow="Step 2">
+        <SectionCard title="Open the problem" eyebrow="Direct practice">
           <div className="question-list">
             {questions.map((question, index) => (
               <div key={question.id} className="question-card">
@@ -180,7 +144,7 @@ export default async function MissionPage({
       ) : detail.canRevealSolution ? (
         <SectionCard
           title={isHrMission ? "Saved for you" : "Review"}
-          eyebrow="Step 3"
+          eyebrow="Completed"
         >
           <p>
             {isHrMission
@@ -191,7 +155,7 @@ export default async function MissionPage({
       ) : (
         <SectionCard
           title={isHrMission ? "Write your answers" : "Try the questions"}
-          eyebrow="Step 1"
+          eyebrow="One attempt"
         >
           <form action={submitMissionAttemptAction} className="question-list">
             <input type="hidden" name="taskId" value={detail.mission.id} />

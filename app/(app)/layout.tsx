@@ -4,7 +4,6 @@ import { redirect } from "next/navigation";
 import { AppShell } from "@/components/app-shell";
 import { getViewerContext } from "@/lib/auth";
 import { getDashboardSnapshot, getViewerStudentPlanState } from "@/lib/data";
-import { formatPlanDate, parseLocalDate, shiftDays } from "@/lib/utils";
 
 export default async function StudentAppLayout({
   children
@@ -26,13 +25,30 @@ export default async function StudentAppLayout({
     planState === "missing";
 
   const programMeta = snapshot
-    ? {
-        startLabel: formatPlanDate(parseLocalDate(snapshot.startDate)),
-        endLabel: formatPlanDate(
-          shiftDays(parseLocalDate(snapshot.startDate), snapshot.totalDays - 1)
-        ),
-        dayLabel: `Day ${snapshot.currentDay} of ${snapshot.totalDays}`
-      }
+    ? (() => {
+        const visibleWeeks = Array.from(
+          new Set(snapshot.missions.map((mission) => mission.weekNumber))
+        );
+        const completedSprintCount = visibleWeeks.filter((weekNumber) => {
+          const sprintMissions = snapshot.missions.filter(
+            (mission) => mission.weekNumber === weekNumber
+          );
+
+          return (
+            sprintMissions.length > 0 &&
+            sprintMissions.every(
+              (mission) => snapshot.progressByTaskId[mission.id]?.status === "completed"
+            )
+          );
+        }).length;
+
+        return {
+          summaryLabel:
+            completedSprintCount > 0
+              ? `Finished ${completedSprintCount} sprint${completedSprintCount === 1 ? "" : "s"} till now`
+              : ""
+        };
+      })()
     : null;
 
   return (

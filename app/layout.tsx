@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     template: "%s | SamyakLabs.AI"
   },
   description:
-    "SamyakLabs.AI offers a 90-day placement preparation app, AI training, GenAI training, diploma and degree classes, 1:1 mentoring, Codex guidance, AI-based development support, and internship-focused programs for students in Nashik and beyond.",
+    "SamyakLabs.AI offers a placement preparation portal with weekly sprint-style guided practice, AI training, GenAI training, diploma and degree classes, 1:1 mentoring, Codex guidance, AI-based development support, and internship-focused programs for students in Nashik and beyond.",
   keywords: [
     "best placement preparation app",
     "placement preparation app in Nashik",
@@ -41,7 +41,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "SamyakLabs.AI",
     description:
-      "Placement preparation, AI training, GenAI training, diploma and degree classes, student internships, and practical learning programs for students in Nashik and online.",
+      "Placement preparation, AI training, GenAI training, diploma and degree classes, student internships, and practical learning support for students in Nashik and online.",
     url: siteUrl,
     siteName: "SamyakLabs.AI",
     type: "website"

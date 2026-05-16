@@ -18,6 +18,7 @@ import { getDemoState } from "@/lib/demo-state";
 import { isSupabaseConfigured } from "@/lib/env";
 import { parsePlanImport, SAMPLE_IMPORT_CSV } from "@/lib/admin-import";
 import {
+  calculateActiveSprintWeek,
   buildDemoProgressMap,
   calculateCurrentDay,
   calculateCurrentStreak,
@@ -120,8 +121,16 @@ function buildDashboardSnapshot(args: {
     args.totalDays,
     DEFAULT_TIMEZONE
   );
-  const visibilityDay = args.profile.fullAccess ? args.totalDays : currentDay;
   const currentWeek = calculateWeekNumber(currentDay);
+  const activeSprintWeek = calculateActiveSprintWeek(
+    args.missions,
+    effectiveProgressByTaskId,
+    args.totalDays,
+    args.profile.fullAccess
+  );
+  const visibleSprintWeek = args.profile.fullAccess
+    ? Math.max(activeSprintWeek, currentWeek)
+    : activeSprintWeek;
   const completedCount = Object.values(effectiveProgressByTaskId).filter(
     (progress) => progress.status === "completed"
   ).length;
@@ -138,15 +147,22 @@ function buildDashboardSnapshot(args: {
   }).length;
 
   const pendingCount = args.missions.filter((mission) => {
-    if (mission.dayNumber > currentDay) {
+    if (mission.weekNumber > visibleSprintWeek) {
       return false;
     }
 
     return effectiveProgressByTaskId[mission.id]?.status !== "completed";
   }).length;
 
+  const activeSprintMissions = args.missions
+    .filter((mission) => mission.weekNumber === activeSprintWeek)
+    .sort((left, right) => left.dayNumber - right.dayNumber);
   const todayMission =
-    args.missions.find((mission) => mission.dayNumber === currentDay) ||
+    activeSprintMissions.find((mission) => {
+      const progress = effectiveProgressByTaskId[mission.id];
+      return progress?.status !== "completed";
+    }) ||
+    activeSprintMissions[0] ||
     args.missions[args.missions.length - 1];
 
   const categoryBreakdown = ([
@@ -168,7 +184,7 @@ function buildDashboardSnapshot(args: {
   const visibleMissionStates = args.missions
     .filter(
       (mission) =>
-        mission.dayNumber <= visibilityDay ||
+        mission.weekNumber <= visibleSprintWeek ||
         Boolean(effectiveProgressByTaskId[mission.id])
     )
     .map((mission) => {
@@ -197,6 +213,7 @@ function buildDashboardSnapshot(args: {
     startDate: args.startDate,
     currentDay,
     currentWeek,
+    activeSprintWeek,
     currentStreak: calculateCurrentStreak(
       args.missions,
       effectiveProgressByTaskId,
@@ -335,6 +352,8 @@ export async function getAdminDashboardSnapshot(): Promise<AdminDashboardSnapsho
           startDate: toDateOnly(new Date(), demoProfile.timezone),
           currentDay: 1,
           totalDays: demoPlan.totalDays,
+          activeSprint: 1,
+          completedSprintCount: 0,
           completedCount: 0,
           inProgressCount: 0,
           completionPercent: 0,
@@ -342,7 +361,8 @@ export async function getAdminDashboardSnapshot(): Promise<AdminDashboardSnapsho
           lastSignInAt: null,
           needsAttention: false
         }
-      ]
+      ],
+      sprintDistribution: [{ sprintNumber: 1, students: 1 }]
     };
   }
 
@@ -370,6 +390,7 @@ export async function getAdminDashboardSnapshot(): Promise<AdminDashboardSnapsho
         taskType,
         completed: 0
       })),
+      sprintDistribution: [],
       userOverview: []
     };
   }
@@ -546,6 +567,18 @@ export async function getAdminDashboardSnapshot(): Promise<AdminDashboardSnapsho
       const completionPercent = availableDays
         ? percent(progressRow?.completedCount || 0, availableDays)
         : 0;
+      const totalSprints = planRow
+        ? Math.max(1, Math.ceil(planRow.durationDays / 7))
+        : 0;
+      const completedSprintCount = planRow
+        ? Math.min(
+            totalSprints,
+            Math.floor((progressRow?.completedCount || 0) / 7)
+          )
+        : 0;
+      const activeSprint = planRow
+        ? Math.min(totalSprints, completedSprintCount + 1)
+        : null;
       const lastActivityAt = progressRow?.lastActivityAt || null;
       const attentionThreshold = Date.now() - 3 * 24 * 60 * 60 * 1000;
       const needsAttention = planRow
@@ -567,6 +600,8 @@ export async function getAdminDashboardSnapshot(): Promise<AdminDashboardSnapsho
         startDate: planRow?.startDate || null,
         currentDay,
         totalDays: planRow?.durationDays || null,
+        activeSprint,
+        completedSprintCount,
         completedCount: progressRow?.completedCount || 0,
         inProgressCount: progressRow?.inProgressCount || 0,
         completionPercent,
@@ -612,6 +647,20 @@ export async function getAdminDashboardSnapshot(): Promise<AdminDashboardSnapsho
           onboardedUsers.length
       )
     : 0;
+  const maxSprint = Math.max(
+    1,
+    ...onboardedUsers.map((user) => user.activeSprint || 1)
+  );
+  const sprintDistribution = Array.from({ length: maxSprint }, (_, index) => {
+    const sprintNumber = index + 1;
+
+    return {
+      sprintNumber,
+      students: onboardedUsers.filter(
+        (user) => (user.activeSprint || 1) === sprintNumber
+      ).length
+    };
+  });
 
   return {
     mode: "supabase",
@@ -636,6 +685,7 @@ export async function getAdminDashboardSnapshot(): Promise<AdminDashboardSnapsho
       taskType,
       completed: taskCompletionCounts.get(taskType) || 0
     })),
+    sprintDistribution,
     userOverview
   };
 }
@@ -835,6 +885,13 @@ export async function getMissionDetail(taskId: string): Promise<MissionDetail | 
   const mission = snapshot.missions.find((item) => item.id === taskId);
 
   if (!mission) {
+    return null;
+  }
+
+  if (
+    !snapshot.hasFullAccess &&
+    mission.weekNumber > snapshot.activeSprintWeek
+  ) {
     return null;
   }
 

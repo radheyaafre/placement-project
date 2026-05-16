@@ -4,13 +4,7 @@ import { redirect } from "next/navigation";
 import { SectionCard } from "@/components/section-card";
 import { StatusBadge } from "@/components/status-badge";
 import { getProgressSnapshot, getViewerStudentPlanState } from "@/lib/data";
-import {
-  buildRedirect,
-  formatPlanDate,
-  formatTaskType,
-  parseLocalDate,
-  shiftDays
-} from "@/lib/utils";
+import { formatPlanDate, formatTaskType, parseLocalDate, shiftDays } from "@/lib/utils";
 
 export default async function ProgressPage() {
   const data = await getProgressSnapshot();
@@ -19,18 +13,14 @@ export default async function ProgressPage() {
     const planState = await getViewerStudentPlanState();
 
     if (planState === "missing") {
-      redirect(
-        buildRedirect("/onboarding", {
-          error: "Complete onboarding once to start your 90-day plan."
-        })
-      );
+      redirect("/onboarding?error=Complete%20onboarding%20once%20to%20start%20your%20placement%20sprint.");
     }
 
     return (
       <div className="stack">
         <SectionCard title="App unavailable" eyebrow="Live data required">
           <p>
-            Progress is unavailable right now because the live placement program data
+            Progress is unavailable right now because the live placement content
             is not ready.
           </p>
           <p className="muted">
@@ -50,25 +40,53 @@ export default async function ProgressPage() {
     );
   }
 
-  const visibleMissionStates = data.snapshot.visibleMissionStates ?? [];
-  const availableMissionStates = visibleMissionStates.filter(
-    ({ mission }) => mission.dayNumber <= data.snapshot.currentDay
+  const snapshot = data.snapshot;
+  const planStartDate = parseLocalDate(snapshot.startDate);
+  const visibleWeeks = Array.from(
+    new Set(
+      snapshot.visibleMissionStates
+        .map(({ mission }) => mission.weekNumber)
+        .sort((left, right) => left - right)
+    )
   );
-  const pendingItems = availableMissionStates.filter(
-    ({ status }) => status !== "completed"
+  const sprintCards = visibleWeeks.map((weekNumber) => {
+    const sprintStates = snapshot.visibleMissionStates.filter(
+      ({ mission }) => mission.weekNumber === weekNumber
+    );
+    const planned = sprintStates.length;
+    const completed = sprintStates.filter(({ status }) => status === "completed").length;
+    const pending = planned - completed;
+    const isCurrent = weekNumber === snapshot.activeSprintWeek;
+    const completedDates = sprintStates
+      .map(({ mission }) => snapshot.progressByTaskId[mission.id]?.completedAt)
+      .filter((value): value is string => Boolean(value))
+      .sort();
+
+    return {
+      weekNumber,
+      planned,
+      completed,
+      pending,
+      isCurrent,
+      isComplete: planned > 0 && pending === 0,
+      completedOn:
+        planned > 0 && pending === 0 && completedDates.length
+          ? formatPlanDate(new Date(completedDates[completedDates.length - 1]))
+          : null
+    };
+  });
+  const completedSprintCount = sprintCards.filter((sprint) => sprint.isComplete).length;
+  const currentSprint = sprintCards.find((sprint) => sprint.isCurrent) || sprintCards[0] || null;
+  const completedSprints = sprintCards.filter(
+    (sprint) => sprint.isComplete && !sprint.isCurrent
   );
-  const completed = visibleMissionStates.filter(
-    ({ status }) => status === "completed"
+  const pendingStates = snapshot.visibleMissionStates.filter(
+    ({ mission, status }) =>
+      status === "attempted" ||
+      status === "solution_unlocked" ||
+      status === "missed" ||
+      (mission.weekNumber < snapshot.activeSprintWeek && status === "available")
   );
-  const completedSoFarCount = availableMissionStates.filter(
-    ({ status }) => status === "completed"
-  ).length;
-  const availableMissionCount =
-    availableMissionStates.length || Math.min(data.snapshot.currentDay, data.snapshot.totalDays);
-  const pendingSoFarCount = data.snapshot.pendingCount;
-  const planStartDate = parseLocalDate(data.snapshot.startDate);
-  const completedDayWord = completedSoFarCount === 1 ? "day" : "days";
-  const pendingDayWord = pendingSoFarCount === 1 ? "day" : "days";
 
   return (
     <div className="stack">
@@ -78,94 +96,110 @@ export default async function ProgressPage() {
           <h1 className="app-page-title">Your Progress</h1>
           <div className="callout">
             <p>
-              <strong>In progress:</strong> Day {data.snapshot.currentDay} of{" "}
-              {data.snapshot.totalDays}. Completed{" "}
-              <strong>
-                {completedSoFarCount} {completedDayWord}
-              </strong>{" "}
-              and pending{" "}
-              <strong>
-                {pendingSoFarCount} {pendingDayWord}
-              </strong>{" "}
-              from your 90-day plan.
+              You have completed <strong>{completedSprintCount}</strong> sprint
+              {completedSprintCount === 1 ? "" : "s"}, finished{" "}
+              <strong>{snapshot.completedCount}</strong> total task
+              {snapshot.completedCount === 1 ? "" : "s"}, and you are now in{" "}
+              <strong>Sprint {snapshot.activeSprintWeek}</strong>.
             </p>
           </div>
         </div>
       </section>
 
-      <SectionCard
-        title="Overview"
-        eyebrow={`Day ${data.snapshot.currentDay} of ${data.snapshot.totalDays}`}
-      >
-        <div className="stat-grid stat-grid--two">
-          <div className="stat-card">
-            <span className="eyebrow">Progress</span>
-            <strong>{completedSoFarCount}/{availableMissionCount}</strong>
-            <p className="muted">completed out of released days</p>
-          </div>
-          <div className="stat-card">
-            <span className="eyebrow">Pending</span>
-            <strong>{pendingSoFarCount}/{availableMissionCount}</strong>
-            <p className="muted">pending out of released days</p>
-          </div>
-        </div>
-      </SectionCard>
+      {currentSprint ? (
+        <SectionCard title={`Sprint ${currentSprint.weekNumber}`} eyebrow="Current sprint">
+          <Link
+            href={`/sprint/${currentSprint.weekNumber}`}
+            className={`sprint-card sprint-card--interactive${
+              currentSprint.isComplete ? " sprint-card--complete" : ""
+            } sprint-card--current`}
+            data-loading-label={`Opening Sprint ${currentSprint.weekNumber}`}
+          >
+            <div className="sprint-card__copy">
+              <strong className="sprint-card__title">
+                Continue Sprint {currentSprint.weekNumber}
+              </strong>
+              <p className="muted">
+                {currentSprint.completed}/{currentSprint.planned} tasks completed
+              </p>
+              <div className="progress-bar" aria-hidden="true">
+                <span
+                  style={{
+                    width: `${currentSprint.planned ? (currentSprint.completed / currentSprint.planned) * 100 : 0}%`
+                  }}
+                />
+              </div>
+              <p className="muted">
+                {currentSprint.pending === 0
+                  ? "Current sprint completed."
+                  : `${currentSprint.pending} task${currentSprint.pending === 1 ? "" : "s"} still pending.`}
+              </p>
+            </div>
+            <div className="sprint-card__meta">
+              <span className="queue-status queue-status--started">Current</span>
+            </div>
+          </Link>
+        </SectionCard>
+      ) : null}
 
-      <SectionCard title="Pending" eyebrow="Pending for you">
-        <div className="task-list">
-          {pendingItems.length ? pendingItems.map(({ mission, status }) => (
-            <Link
-              key={mission.id}
-              href={`/mission/${mission.id}`}
-              className="task-row task-row--interactive"
-              data-loading-label={`Opening Day ${mission.dayNumber}`}
-            >
-              <div className="task-row__meta">
-                <strong className="task-row__title-text">
-                  Day {mission.dayNumber}: {mission.title}
-                </strong>
-                <p className="task-row__schedule">
-                  {formatPlanDate(shiftDays(planStartDate, mission.dayNumber - 1))}
-                </p>
-                <p className="muted">
-                  {formatTaskType(mission.taskType)} • {mission.estimatedMinutes} min
-                </p>
-              </div>
-              <div className="pill-row">
-                <StatusBadge taskType={mission.taskType} />
-                <StatusBadge status={status} />
-              </div>
-            </Link>
-          )) : <p className="muted">Nothing is pending right now.</p>}
-        </div>
-      </SectionCard>
+      {completedSprints.length ? (
+        <SectionCard title="Completed sprints" eyebrow="Finished">
+          <div className="sprint-grid">
+            {completedSprints.map((sprint) => (
+              <Link
+                key={sprint.weekNumber}
+                href={`/sprint/${sprint.weekNumber}`}
+                className="sprint-card sprint-card--interactive sprint-card--complete"
+                data-loading-label={`Opening Sprint ${sprint.weekNumber}`}
+              >
+                <div className="sprint-card__copy">
+                  <strong className="sprint-card__title">Sprint {sprint.weekNumber}</strong>
+                  <p className="muted">{sprint.completed}/{sprint.planned} tasks completed</p>
+                  <p className="muted">
+                    {sprint.completedOn
+                      ? `Completed on ${sprint.completedOn}`
+                      : "Completed"}
+                  </p>
+                </div>
+                <div className="sprint-card__meta">
+                  <span className="queue-status queue-status--done">Completed</span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </SectionCard>
+      ) : null}
 
-      <SectionCard title="Completed" eyebrow="Done">
+      <SectionCard title="Earlier pending work" eyebrow="Catch up">
         <div className="task-list">
-          {completed.length ? completed.map(({ mission, status }) => (
-            <Link
-              key={mission.id}
-              href={`/mission/${mission.id}`}
-              className="task-row task-row--interactive task-row--completed"
-              data-loading-label={`Opening Day ${mission.dayNumber}`}
-            >
-              <div className="task-row__meta">
-                <strong className="task-row__title-text">
-                  Day {mission.dayNumber}: {mission.title}
-                </strong>
-                <p className="task-row__schedule">
-                  {formatPlanDate(shiftDays(planStartDate, mission.dayNumber - 1))}
-                </p>
-                <p className="muted">
-                  {formatTaskType(mission.taskType)} • {mission.estimatedMinutes} min
-                </p>
-              </div>
-              <div className="pill-row">
-                <StatusBadge taskType={mission.taskType} />
-                <StatusBadge status={status} />
-              </div>
-            </Link>
-          )) : <p className="muted">Completed missions will appear here.</p>}
+          {pendingStates.length ? (
+            pendingStates.map(({ mission, status }) => (
+              <Link
+                key={mission.id}
+                href={`/mission/${mission.id}`}
+                className="task-row task-row--interactive"
+                data-loading-label={`Opening Day ${mission.dayNumber}`}
+              >
+                <div className="task-row__meta">
+                  <strong className="task-row__title-text">
+                    Sprint {mission.weekNumber} • Day {mission.dayNumber}: {mission.title}
+                  </strong>
+                  <p className="task-row__schedule">
+                    {formatPlanDate(shiftDays(planStartDate, mission.dayNumber - 1))}
+                  </p>
+                  <p className="muted">
+                    {formatTaskType(mission.taskType)} • {mission.estimatedMinutes} min
+                  </p>
+                </div>
+                <div className="pill-row">
+                  <StatusBadge taskType={mission.taskType} />
+                  <StatusBadge status={status} />
+                </div>
+              </Link>
+            ))
+          ) : (
+            <p className="muted">No pending work right now.</p>
+          )}
         </div>
       </SectionCard>
     </div>

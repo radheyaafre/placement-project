@@ -43,8 +43,8 @@ export default async function OnboardingPage({
           </div>
         </div>
         <p className="muted">
-          This is the first required step after login. Save these details once, start
-          your 90-day plan from today, and then the main dashboard becomes your home.
+          This is the only required step after login. Save these details once, start
+          your placement track from today, and then the dashboard becomes your main home.
         </p>
         {error ? <div className="notice">{error}</div> : null}
         <form action={saveOnboardingAction} className="stack">
@@ -116,10 +116,10 @@ export default async function OnboardingPage({
         </div>
         <div className="stack">
           <div className="callout">
-            <h3>1. Your Day 1 gets fixed</h3>
+            <h3>1. Your start date gets fixed</h3>
             <p className="muted">
-              The program starts from the day you save this form, so your 90-day flow
-              tracks against your own join date.
+              The track starts from the day you save this form, so every release date
+              follows your own join date.
             </p>
           </div>
           <div className="callout">

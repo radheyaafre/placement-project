@@ -99,6 +99,7 @@ export interface DashboardSnapshot {
   startDate: string;
   currentDay: number;
   currentWeek: number;
+  activeSprintWeek: number;
   currentStreak: number;
   completedCount: number;
   inProgressCount: number;
@@ -165,6 +166,8 @@ export interface AdminUserOverview {
   startDate: string | null;
   currentDay: number | null;
   totalDays: number | null;
+  activeSprint: number | null;
+  completedSprintCount: number;
   completedCount: number;
   inProgressCount: number;
   completionPercent: number;
@@ -201,6 +204,10 @@ export interface AdminDashboardSnapshot {
   taskCompletionMix: Array<{
     taskType: TaskType;
     completed: number;
+  }>;
+  sprintDistribution: Array<{
+    sprintNumber: number;
+    students: number;
   }>;
   userOverview: AdminUserOverview[];
 }
